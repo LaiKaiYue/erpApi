@@ -53,7 +53,7 @@ function backUpSql()
         $mysql .= "\r\n";
     }
 
-    $filename = date('Ymj') . ".sql"; //文件名為當天的日期
+    $filename = "./backup/".date('Ymj') . ".sql"; //文件名為當天的日期
     $fp = fopen($filename, 'w');
     fputs($fp, $mysql);
     fclose($fp);
@@ -68,7 +68,7 @@ function restoreSql($fname)
     $link = mysqli_connect($backup_dbhost, $backup_dbuser, $backup_dbpass, $backup_dbname);
     mysqli_set_charset($link, 'utf8');
 
-    $mysql_file = $fname; //指定要恢復的MySQL備份文件路徑,請自已修改此路徑
+    $mysql_file = "./backup/".$fname; //指定要恢復的MySQL備份文件路徑,請自已修改此路徑
 
     if (file_exists($fname)) {
         $sql_value = "";
