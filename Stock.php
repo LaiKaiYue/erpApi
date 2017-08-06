@@ -26,6 +26,10 @@ switch ($func) {
         $result = getProductLeaderBoard();
         echo json_encode($result);
         break;
+    case "getSalesProductLeaderBoard":
+        $result = getSalesProductLeaderBoard();
+        echo json_encode($result);
+        break;
     case "getEnableStock":
         break;
     case "getDisableStock":
@@ -502,6 +506,20 @@ function getProductLeaderBoard()
     $sql = "select * from product_leaderboard where vendor_code='$vendor_code' ORDER BY count DESC";
     $result = $link->query($sql);
     while ($row = $result->fetch_array(MYSQLI_ASSOC)) {
+        $data[] = array(
+            "product_code" => $row["product_code"],
+            "product_name" => $row["product_name"]
+        );
+    }
+    return $data;
+}
+
+function getSalesProductLeaderBoard(){
+    global $link, $postDT;
+    $custom_code = $postDT["custom_code"];
+    $sql = "select * from product_leaderboard where vendor_code='$custom_code' order BY  count DESC";
+    $result = $link->query($sql);
+    while($row = $result->fetch_array(MYSQLI_ASSOC)){
         $data[] = array(
             "product_code" => $row["product_code"],
             "product_name" => $row["product_name"]

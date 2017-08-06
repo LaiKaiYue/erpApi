@@ -54,6 +54,10 @@ switch ($func) {
         $result = update_header_price();
         echo json_encode($result);
         break;
+    case "payment":
+        $result = payment();
+        echo json_encode($result);
+        break;
     default:
         $value = "An error has occurred";
         exit(json_encode($value));
@@ -282,7 +286,7 @@ function RemovePurchase_header()
         $status = $row["status"];
 
         //不是退貨扣庫存
-        if($status != 2){
+        if ($status != 2) {
             //扣商品排名數量
             reduce_leaderboard_count($product_code, $vendor_code, $product_num);
             //扣庫存
@@ -334,7 +338,7 @@ function RemovePurchase_body()
     $status = $row["status"];
 
     //不是退貨扣庫存
-    if($status != 2){
+    if ($status != 2) {
         //扣除商品進貨次數，製作進貨排名用
         reduce_leaderboard_count($pro_code, $vendor_code, $product_num);
         //扣庫存
@@ -416,6 +420,16 @@ function update_header_price()
     $sql = "update purchase_header set excluded_tax_total='$excluded_tax_total', tax='$tax', included_tax_total='$included_tax_total' where order_number='$order_number'";
     $result = $link->query($sql);
 
+    $link->close();
+    return $result;
+}
+
+// 結帳
+function payment()
+{
+    global $link, $postDT;
+    $sql = "update purchase_header set status='1' where order_number = '" . $postDT["order_number"] . "'";
+    $result = $link->query($sql);
     $link->close();
     return $result;
 }

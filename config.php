@@ -12,6 +12,12 @@ $dbuser = $config['database']['username'];
 $dbpass = $config['database']['password'];
 $dbname = $config['database']['dbname'];
 
+$backup_dbhost = $config['backupDB']['host'];
+$backup_dbuser = $config['backupDB']['username'];
+$backup_dbpass = $config['backupDB']['password'];
+$backup_dbname = $config['backupDB']['dbname'];
+
+
 //設定時區
 date_default_timezone_set('Asia/Taipei');
 
