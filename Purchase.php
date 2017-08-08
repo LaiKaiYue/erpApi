@@ -54,6 +54,10 @@ switch ($func) {
         $result = update_header_price();
         echo json_encode($result);
         break;
+    case "getAllPay":
+        $result = getAllPay();
+        echo json_encode($result);
+        break;
     case "payment":
         $result = payment();
         echo json_encode($result);
@@ -422,6 +426,35 @@ function update_header_price()
 
     $link->close();
     return $result;
+}
+
+/**
+ * 取得所有未沖款進貨單
+ */
+function getAllPay()
+{
+    global $link, $postDT;
+
+    $s1 = "select a.*, b.closing_date from purchase_header a, vendorsInfo b where a.vendor_code = b.code and a.status = '0' ORDER BY a.order_number ASC";
+    $r1 = $link->query($s1);
+    while ($row = $r1->fetch_array(MYSQLI_ASSOC)) {
+        $data[] = array(
+            "order_number" => $row["order_number"],
+            "vendor_code" => $row["vendor_code"],
+            "vendor_name" => $row["vendor_name"],
+            "create_date" => $row["create_date"],
+            "payment_type" => $row["payment_type"],
+            "invoice_type" => $row["invoice_type"],
+            "excluded_tax_total" => $row["excluded_tax_total"],
+            "tax" => $row["tax"],
+            "included_tax_total" => $row["included_tax_total"],
+            "status" => $row["status"],
+            "remark" => $row["remark"],
+            "closing_date" => $row["closing_date"]
+        );
+    }
+    $link->close();
+    return $data;
 }
 
 // 結帳
