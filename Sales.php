@@ -14,6 +14,10 @@ switch ($func) {
         $result = getAllSales();
         echo json_encode($result);
         break;
+    case "getCustomNoPaymentSales":
+        $result = getCustomNoPaymentSales();
+        echo json_encode($result);
+        break;
     case "getOneSales":
         $result = getOneSales();
         echo json_encode($result);
@@ -54,6 +58,10 @@ switch ($func) {
         $result = update_header_price();
         echo json_encode($result);
         break;
+    case "getAllBill":
+        $result = getAllBill();
+        echo json_encode($result);
+        break;
     case "payment":
         $result = payment();
         echo json_encode($result);
@@ -76,6 +84,7 @@ function getAllSales()
     while ($row = $r1->fetch_array(MYSQLI_ASSOC)) {
         $data[] = array(
             "order_number" => $row["order_number"],
+            "ship_nos" => $row["ship_nos"],
             "custom_code" => $row["custom_code"],
             "custom_name" => $row["custom_name"],
             "create_date" => $row["create_date"],
@@ -86,6 +95,35 @@ function getAllSales()
             "included_tax_total" => $row["included_tax_total"],
             "status" => $row["status"],
             "remark" => $row["remark"]
+        );
+    }
+    $link->close();
+    return $data;
+}
+
+// 取客戶未結進貨單
+function getCustomNoPaymentSales(){
+    global $link, $postDT;
+    $custom_code = $postDT["custom_code"];
+    $sql = "SELECT a.*, b.closing_date FROM sales_header AS a 
+INNER JOIN customerinfo AS b ON b.`code` = a.custom_code 
+where a.status = '0' and a.custom_code = '$custom_code'";
+    $result = $link->query($sql);
+    while($row = $result->fetch_array(MYSQLI_ASSOC)){
+        $data[] = array(
+            "order_number" => $row["order_number"],
+            "ship_nos" => $row["ship_nos"],
+            "custom_code" => $row["custom_code"],
+            "custom_name" => $row["custom_name"],
+            "create_date" => $row["create_date"],
+            "payment_type" => $row["payment_type"],
+            "invoice_type" => $row["invoice_type"],
+            "excluded_tax_total" => $row["excluded_tax_total"],
+            "tax" => $row["tax"],
+            "included_tax_total" => $row["included_tax_total"],
+            "status" => $row["status"],
+            "remark" => $row["remark"],
+            "closing_date" => $row["closing_date"]
         );
     }
     $link->close();
@@ -137,11 +175,12 @@ function getOneSales_body()
             "product_name" => $row["product_name"],
             "product_unit" => $row["product_unit"],
             "product_num" => $row["product_num"],
-            "unit_cost" => $row["unit_cost"],
+            "selling_price" => $row["selling_price"],
             "excluded_tax_total" => $row["excluded_tax_total"],
             "tax" => $row["tax"],
             "included_tax_total" => $row["included_tax_total"],
-            "status" => $row["status"]
+            "status" => $row["status"],
+            "discount_type" => $row["discount_type"]
         );
     }
     $link->close();
@@ -184,6 +223,7 @@ function InsertSales()
 
 //    Sales header
     $order_number = $postDT["order_number"];
+    $ship_nos = $postDT["ship_nos"];
     $create_date = $postDT["create_date"];
     $custom_code = $postDT["custom_code"];
     $custom_name = $postDT["custom_name"];
@@ -194,9 +234,17 @@ function InsertSales()
     $included_tax_total = $postDT["included_tax_total"];
     $remark = $postDT["remark"];
 
-    $s1 = "insert into sales_header(order_number, create_date, custom_code, custom_name, payment_type, invoice_type, excluded_tax_total, tax, included_tax_total, remark) VALUES
-('$order_number', '$create_date', '$custom_code', '$custom_name', '$payment_type', '$invoice_type', '$excluded_tax_total', '$tax', '$included_tax_total', '$remark')";
-    $r1 = $link->query($s1);
+    if($payment_type == 0){
+        $s1 = "insert into sales_header(order_number, ship_nos, create_date, custom_code, custom_name, payment_type, invoice_type, excluded_tax_total, tax, included_tax_total, remark, status) VALUES
+        ('$order_number', '$ship_nos', '$create_date', '$custom_code', '$custom_name', '$payment_type', '$invoice_type', '$excluded_tax_total', '$tax', '$included_tax_total', '$remark', '1')";
+        $r1 = $link->query($s1);
+    }
+    else{
+        $s1 = "insert into sales_header(order_number, ship_nos, create_date, custom_code, custom_name, payment_type, invoice_type, excluded_tax_total, tax, included_tax_total, remark) VALUES
+        ('$order_number', '$ship_nos', '$create_date', '$custom_code', '$custom_name', '$payment_type', '$invoice_type', '$excluded_tax_total', '$tax', '$included_tax_total', '$remark')";
+        $r1 = $link->query($s1);
+    }
+    
 
     // Sales body
     $productLength = count($product);
@@ -206,20 +254,30 @@ function InsertSales()
         $product_name = $product[$i]["product_name"];
         $unit = $product[$i]["product_unit"];
         $product_num = $product[$i]["product_num"];
-        $unit_cost = $product[$i]["unit_cost"];
+        $selling_price = $product[$i]["selling_price"];
         $excluded_sub_total = $product[$i]["excluded_tax_total"];
         $sub_tax = $product[$i]["tax"];
         $included_sub_total = $product[$i]["included_tax_total"];
+        $discount_type = $product[$i]["discount_type"];
 
-        $s2 = "insert into sales_body (order_number, product_order, product_code, product_name, product_unit, product_num, unit_cost, excluded_tax_total, tax, included_tax_total) VALUES
-('$order_number','$product_order', '$product_code', '$product_name', '$unit', '$product_num', '$unit_cost', '$excluded_sub_total', '$sub_tax', '$included_sub_total')";
-        $r2 = $link->query($s2);
+        if($payment_type == 0){
+            $s2 = "insert into sales_body (order_number, product_order, product_code, product_name, product_unit, product_num, selling_price, excluded_tax_total, tax, included_tax_total, discount_type, status) VALUES
+            ('$order_number','$product_order', '$product_code', '$product_name', '$unit', '$product_num', '$selling_price', '$excluded_sub_total', '$sub_tax', '$included_sub_total', '$discount_type', '1')";
+            $r2 = $link->query($s2);
+        }
+        else{
+            $s2 = "insert into sales_body (order_number, product_order, product_code, product_name, product_unit, product_num, selling_price, excluded_tax_total, tax, included_tax_total, discount_type) VALUES
+            ('$order_number','$product_order', '$product_code', '$product_name', '$unit', '$product_num', '$selling_price', '$excluded_sub_total', '$sub_tax', '$included_sub_total', '$discount_type')";
+            $r2 = $link->query($s2);
+        }
+
+        
 
         //紀錄商品進貨次數 製作進貨排名用
         increase_leaderboard_count($product_code, $custom_code, $product_name, $product_num);
 
-        //增加產品庫存
-        increase_stock_num($product_code, $product_num);
+        //減少產品庫存
+        reduce_stock_num($product_code, $product_num);
     }
     $link->close();
 
@@ -234,16 +292,16 @@ function InsertSales()
 function increase_leaderboard_count($product_code, $custom_code, $product_name, $product_num)
 {
     global $link;
-    $s3 = "select * from product_leaderboard where product_code='$product_code' and vendor_code='$custom_code'";
+    $s3 = "select * from sales_leaderboard where product_code='$product_code' and custom_code='$custom_code'";
     $r3 = $link->query($s3);
     if ($r3->num_rows > 0) {
         $row = $r3->fetch_array(MYSQLI_ASSOC);
         $count = $row["count"];
         $count += (int)$product_num;
-        $s4 = "update product_leaderboard set count='$count' where product_code='$product_code' and vendor_code='$custom_code'";
+        $s4 = "update sales_leaderboard set count='$count' where product_code='$product_code' and custom_code='$custom_code'";
         $r4 = $link->query($s4);
     } else {
-        $s4 = "insert into product_leaderboard (vendor_code, product_code, product_name) VALUES ('$custom_code', '$product_code', '$product_name')";
+        $s4 = "insert into sales_leaderboard (custom_code, product_code, product_name) VALUES ('$custom_code', '$product_code', '$product_name')";
         $r4 = $link->query($s4);
     }
 }
@@ -291,7 +349,7 @@ function RemoveSales_header()
             //扣商品排名數量
             reduce_leaderboard_count($product_code, $custom_code, $product_num);
             //扣庫存
-            reduce_stock_num($product_code, $product_num);
+            increase_stock_num($product_code, $product_num);
         }
 
     }
@@ -343,7 +401,7 @@ function RemoveSales_body()
         //扣除商品進貨次數，製作進貨排名用
         reduce_leaderboard_count($pro_code, $custom_code, $product_num);
         //扣庫存
-        reduce_stock_num($pro_code, $product_num);
+        increase_stock_num($pro_code, $product_num);
     }
 
     if ($pro_type == 0) {
@@ -368,13 +426,13 @@ function RemoveSales_body()
 
 /**
  * 扣商品排名數量
- * @param $pro_code 商品代號
+ * @param $product_code 商品代號
  * @param $custom_code 客戶代號
  */
-function reduce_leaderboard_count($pro_code, $custom_code, $product_num)
+function reduce_leaderboard_count($product_code, $custom_code, $product_num)
 {
     global $link;
-    $s2 = "select * from product_leaderboard where product_code='$pro_code' and vendor_code='$custom_code'";
+    $s2 = "select * from sales_leaderboard where product_code='$product_code' and custom_code='$custom_code'";
     $r2 = $link->query($s2);
     if ($r2->num_rows > 0) {
         $row = $r2->fetch_array(MYSQLI_ASSOC);
@@ -382,7 +440,7 @@ function reduce_leaderboard_count($pro_code, $custom_code, $product_num)
         if ($count > 0) {
             $count -= (int)$product_num;
             $count = ($count < 0) ? 0 : $count;
-            $s3 = "update product_leaderboard set count='$count' where product_code='$pro_code' and vendor_code='$custom_code'";
+            $s3 = "update sales_leaderboard set count='$count' where product_code='$product_code' and custom_code='$custom_code'";
             $r3 = $link->query($s3);
         }
     }
@@ -390,21 +448,19 @@ function reduce_leaderboard_count($pro_code, $custom_code, $product_num)
 
 /**
  * 扣商品庫存
- * @param $pro_code 商品代號
+ * @param $product_code 商品代號
  */
-function reduce_stock_num($pro_code, $product_num)
+function reduce_stock_num($product_code, $product_num)
 {
     global $link;
     $s2 = "select stock_num from stockInfo where code='$pro_code'";
     $r2 = $link->query($s2);
     $row = $r2->fetch_array(MYSQLI_ASSOC);
     $stock_num = $row["stock_num"];
-    if ($stock_num > 0) {
-        $stock_num -= (int)$product_num;
-        $stock_num = ($stock_num < 0) ? 0 : $stock_num;
-        $s3 = "update stockInfo set stock_num='$stock_num' where code='$pro_code'";
-        $r3 = $link->query($s3);
-    }
+    $stock_num -= (int)$product_num;
+
+    $s3 = "update stockInfo set stock_num='$stock_num' where code='$product_code'";
+    $r3 = $link->query($s3);
 }
 
 /**
@@ -423,6 +479,35 @@ function update_header_price()
 
     $link->close();
     return $result;
+}
+
+/**
+ * 取得所有未沖款銷貨單
+ */
+function getAllBill()
+{
+    global $link, $postDT;
+
+    $s1 = "select a.*, b.closing_date from sales_header a, customerInfo b where a.custom_code = b.code and a.status = '0' ORDER BY a.order_number ASC";
+    $r1 = $link->query($s1);
+    while ($row = $r1->fetch_array(MYSQLI_ASSOC)) {
+        $data[] = array(
+            "order_number" => $row["order_number"],
+            "custom_code" => $row["custom_code"],
+            "custom_name" => $row["custom_name"],
+            "create_date" => $row["create_date"],
+            "payment_type" => $row["payment_type"],
+            "invoice_type" => $row["invoice_type"],
+            "excluded_tax_total" => $row["excluded_tax_total"],
+            "tax" => $row["tax"],
+            "included_tax_total" => $row["included_tax_total"],
+            "status" => $row["status"],
+            "remark" => $row["remark"],
+            "closing_date" => $row["closing_date"]
+        );
+    }
+    $link->close();
+    return $data;
 }
 
 // 結帳

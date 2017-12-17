@@ -12,15 +12,17 @@ require_once "config.php";
 //$product = json_decode($postDT["product"]);
 //$WorkingArray = json_decode(json_encode($postDT["product"]),true);
 
-$key[] = array(
-    "key" => "1"
-);
-$data[] = array(
-    "code" => "test",
-    "product" => $key
-);
+echo phpinfo();
 
-echo json_encode($data);
+//$key[] = array(
+//    "key" => "1"
+//);
+//$data[] = array(
+//    "code" => "test",
+//    "product" => $key
+//);
+//
+//echo json_encode($data);
 //    $username = $_POST["uname"];
 //    $apellido = $_POST["apellido"];
 //    $cedula = $_POST["cedula"];

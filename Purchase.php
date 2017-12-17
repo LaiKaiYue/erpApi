@@ -14,6 +14,10 @@ switch ($func) {
         $result = getAllPurchase();
         echo json_encode($result);
         break;
+    case "getVendorNoPaymentPurchase":
+        $result = getVendorNoPaymentPurchase();
+        echo json_encode($result);
+        break;
     case "getOnePurchase":
         $result = getOnePurchase();
         echo json_encode($result);
@@ -89,6 +93,34 @@ function getAllPurchase()
             "included_tax_total" => $row["included_tax_total"],
             "status" => $row["status"],
             "remark" => $row["remark"]
+        );
+    }
+    $link->close();
+    return $data;
+}
+
+// 取廠商未結進貨單
+function getVendorNoPaymentPurchase(){
+    global $link, $postDT;
+    $vendor_code = $postDT["vendor_code"];
+    $sql = "SELECT a.*, b.closing_date FROM purchase_header AS a 
+INNER JOIN vendorsinfo AS b ON b.`code` = a.vendor_code 
+where a.status = '0' and a.vendor_code = '$vendor_code'";
+    $result = $link->query($sql);
+    while($row = $result->fetch_array(MYSQLI_ASSOC)){
+        $data[] = array(
+            "order_number" => $row["order_number"],
+            "vendor_code" => $row["vendor_code"],
+            "vendor_name" => $row["vendor_name"],
+            "create_date" => $row["create_date"],
+            "payment_type" => $row["payment_type"],
+            "invoice_type" => $row["invoice_type"],
+            "excluded_tax_total" => $row["excluded_tax_total"],
+            "tax" => $row["tax"],
+            "included_tax_total" => $row["included_tax_total"],
+            "status" => $row["status"],
+            "remark" => $row["remark"],
+            "closing_date" => $row["closing_date"]
         );
     }
     $link->close();
@@ -197,9 +229,18 @@ function InsertPurchase()
     $included_tax_total = $postDT["included_tax_total"];
     $remark = $postDT["remark"];
 
-    $s1 = "insert into purchase_header(order_number, create_date, vendor_code, vendor_name, payment_type, invoice_type, excluded_tax_total, tax, included_tax_total, remark) VALUES
-('$order_number', '$create_date', '$vendor_code', '$vendor_name', '$payment_type', '$invoice_type', '$excluded_tax_total', '$tax', '$included_tax_total', '$remark')";
-    $r1 = $link->query($s1);
+    if($payment_type == 0){
+        $s1 = "insert into purchase_header(order_number, create_date, vendor_code, vendor_name, payment_type, invoice_type, excluded_tax_total, tax, included_tax_total, remark, status) VALUES
+        ('$order_number', '$create_date', '$vendor_code', '$vendor_name', '$payment_type', '$invoice_type', '$excluded_tax_total', '$tax', '$included_tax_total', '$remark', '1')";
+        $r1 = $link->query($s1);
+    }
+    else{
+        $s1 = "insert into purchase_header(order_number, create_date, vendor_code, vendor_name, payment_type, invoice_type, excluded_tax_total, tax, included_tax_total, remark) VALUES
+        ('$order_number', '$create_date', '$vendor_code', '$vendor_name', '$payment_type', '$invoice_type', '$excluded_tax_total', '$tax', '$included_tax_total', '$remark')";
+        $r1 = $link->query($s1);
+    }
+
+    
 
     // purchase body
     $productLength = count($product);
@@ -214,9 +255,18 @@ function InsertPurchase()
         $sub_tax = $product[$i]["tax"];
         $included_sub_total = $product[$i]["included_tax_total"];
 
-        $s2 = "insert into purchase_body (order_number, product_order, product_code, product_name, product_unit, product_num, unit_cost, excluded_tax_total, tax, included_tax_total) VALUES
-('$order_number','$product_order', '$product_code', '$product_name', '$unit', '$product_num', '$unit_cost', '$excluded_sub_total', '$sub_tax', '$included_sub_total')";
-        $r2 = $link->query($s2);
+        if($payment_type == 0){
+            $s2 = "insert into purchase_body (order_number, product_order, product_code, product_name, product_unit, product_num, unit_cost, excluded_tax_total, tax, included_tax_total, status) VALUES
+            ('$order_number','$product_order', '$product_code', '$product_name', '$unit', '$product_num', '$unit_cost', '$excluded_sub_total', '$sub_tax', '$included_sub_total', '1')";
+            $r2 = $link->query($s2);
+        }
+        else{
+            $s2 = "insert into purchase_body (order_number, product_order, product_code, product_name, product_unit, product_num, unit_cost, excluded_tax_total, tax, included_tax_total) VALUES
+            ('$order_number','$product_order', '$product_code', '$product_name', '$unit', '$product_num', '$unit_cost', '$excluded_sub_total', '$sub_tax', '$included_sub_total')";
+            $r2 = $link->query($s2);
+        }
+
+        
 
         //紀錄商品進貨次數 製作進貨排名用
         increase_leaderboard_count($product_code, $vendor_code, $product_name, $product_num);

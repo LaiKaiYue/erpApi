@@ -517,7 +517,7 @@ function getProductLeaderBoard()
 function getSalesProductLeaderBoard(){
     global $link, $postDT;
     $custom_code = $postDT["custom_code"];
-    $sql = "select * from product_leaderboard where vendor_code='$custom_code' order BY  count DESC";
+    $sql = "select * from sales_leaderboard where custom_code='$custom_code' order BY  count DESC";
     $result = $link->query($sql);
     while($row = $result->fetch_array(MYSQLI_ASSOC)){
         $data[] = array(
