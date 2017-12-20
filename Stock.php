@@ -64,8 +64,7 @@ switch ($func) {
         break;
 }
 
-function getStockSQL()
-{
+function getStockSQL() {
     global $link;
     $sql = "SELECT
             stockinfo.`code` AS `code`,
@@ -98,17 +97,16 @@ function getStockSQL()
  * 取庫存最新流水號
  * @return string
  */
-function getStockLastSN()
-{
+function getStockLastSN() {
     global $link;
     $sql = "select SN from stockinfo order by SN DESC limit 1";
     $result = $link->query($sql);
     $row = $result->fetch_assoc();
     $link->close();
     $SN = $row["SN"] + 1;
-    if ($SN < 10) $SN = "S000" . $SN;
-    else if ($SN < 100) $SN = "S00" . $SN;
-    else if ($SN < 1000) $SN = "S0" . $SN;
+    if ($SN < 10) $SN = "S000".$SN;
+    else if ($SN < 100) $SN = "S00".$SN;
+    else if ($SN < 1000) $SN = "S0".$SN;
 
     return $SN;
 }
@@ -117,8 +115,7 @@ function getStockLastSN()
  * 取得所有庫存
  * @return array
  */
-function getAllStock()
-{
+function getAllStock() {
     global $link;
     $result = getStockSQL();
     if ($result->num_rows > 0) {
@@ -132,7 +129,7 @@ function getAllStock()
             $length = count($vendor);
             if ($length > 1) {
                 for ($index = 0; $index < $length; $index++) {
-                    $s = "select code, name, contact_name, contact_tell_nos from vendorsInfo where code='$vendor[$index]' and enable='true'";
+                    $s = "select code, name, contact_name, contact_tell_nos from vendorsinfo where code='$vendor[$index]' and enable='true'";
                     $r = $link->query($s);
                     $dt = mysqli_fetch_array($r);
                     if (($index + 1) == $length) {
@@ -140,15 +137,17 @@ function getAllStock()
                         $name .= $dt["name"];
                         $contact_name .= $dt["contact_name"];
                         $contact_tell_nos .= $dt["contact_tell_nos"];
-                    } else {
-                        $code .= $dt["code"] . ",";
-                        $name .= $dt["name"] . ",";
-                        $contact_name .= $dt["contact_name"] . ",";
-                        $contact_tell_nos .= $dt["contact_tell_nos"] . ",";
+                    }
+                    else {
+                        $code .= $dt["code"].",";
+                        $name .= $dt["name"].",";
+                        $contact_name .= $dt["contact_name"].",";
+                        $contact_tell_nos .= $dt["contact_tell_nos"].",";
                     }
                 }
-            } else {
-                $s = "select code, name, contact_name, contact_tell_nos from vendorsInfo where code='$vendor[0]' and enable='true'";
+            }
+            else {
+                $s = "select code, name, contact_name, contact_tell_nos from vendorsinfo where code='$vendor[0]' and enable='true'";
                 $r = $link->query($s);
                 $dt = mysqli_fetch_array($r);
                 $code .= $dt["code"];
@@ -189,8 +188,7 @@ function getAllStock()
  * @param $code {String} 庫存code
  * @return array 庫存資料
  */
-function getOneStock()
-{
+function getOneStock() {
     global $link, $postDT;
     $code = $postDT["code"];
     $sql = "SELECT
@@ -236,14 +234,16 @@ function getOneStock()
                         $name .= $dt["name"];
                         $contact_name .= $dt["contact_name"];
                         $contact_tell_nos .= $dt["contact_tell_nos"];
-                    } else {
-                        $code .= $dt["code"] . ",";
-                        $name .= $dt["name"] . ",";
-                        $contact_name .= $dt["contact_name"] . ",";
-                        $contact_tell_nos .= $dt["contact_tell_nos"] . ",";
+                    }
+                    else {
+                        $code .= $dt["code"].",";
+                        $name .= $dt["name"].",";
+                        $contact_name .= $dt["contact_name"].",";
+                        $contact_tell_nos .= $dt["contact_tell_nos"].",";
                     }
                 }
-            } else {
+            }
+            else {
                 $s = "select code, name, contact_name, contact_tell_nos from vendorsInfo where code='$vendor[0]' and enable='true'";
                 $r = $link->query($s);
                 $dt = mysqli_fetch_array($r);
@@ -283,8 +283,7 @@ function getOneStock()
 /**
  * 取廠商商品資料
  */
-function getVendorProduct()
-{
+function getVendorProduct() {
     global $postDT, $link;
     $code = $postDT["code"];
 
@@ -339,8 +338,7 @@ function getVendorProduct()
  * 新增庫存
  * @return bool|mysqli_result
  */
-function InsertStock()
-{
+function InsertStock() {
     global $postDT, $link;
     $code = $postDT["code"];
     $vendors_code = $postDT["vendors_code"];
@@ -370,8 +368,7 @@ function InsertStock()
  * 修改庫存
  * @return bool|mysqli_result
  */
-function UpdateStock()
-{
+function UpdateStock() {
     global $postDT, $link;
     $code = $postDT["code"];
     $vendors_code = $postDT["vendors_code"];
@@ -402,8 +399,7 @@ function UpdateStock()
  * 刪除庫存
  * @return bool|mysqli_result
  */
-function DeleteStock()
-{
+function DeleteStock() {
     global $postDT, $link;
     $code = $postDT["code"];
     $enable = "false";
@@ -417,8 +413,7 @@ function DeleteStock()
  * 刪除所有庫存
  * @return bool|mysqli_result
  */
-function DeleteAllStock()
-{
+function DeleteAllStock() {
     global $link;
     $enable = "false";
     $sql = "update stockinfo set enable='$enable'";
@@ -431,8 +426,7 @@ function DeleteAllStock()
  * 取得低於安全庫存
  * @return array
  */
-function getUnderSafeStock()
-{
+function getUnderSafeStock() {
     global $link;
     $result = getStockSQL();
 
@@ -454,14 +448,16 @@ function getUnderSafeStock()
                         $name .= $dt["name"];
                         $contact_name .= $dt["contact_name"];
                         $contact_tell_nos .= $dt["contact_tell_nos"];
-                    } else {
-                        $code .= $dt["code"] . ",";
-                        $name .= $dt["name"] . ",";
-                        $contact_name .= $dt["contact_name"] . ",";
-                        $contact_tell_nos .= $dt["contact_tell_nos"] . ",";
+                    }
+                    else {
+                        $code .= $dt["code"].",";
+                        $name .= $dt["name"].",";
+                        $contact_name .= $dt["contact_name"].",";
+                        $contact_tell_nos .= $dt["contact_tell_nos"].",";
                     }
                 }
-            } else {
+            }
+            else {
                 $s = "select code, name, contact_name, contact_tell_nos from vendorsInfo where code='$vendor[0]' and enable='true'";
                 $r = $link->query($s);
                 $dt = mysqli_fetch_array($r);
@@ -499,8 +495,7 @@ function getUnderSafeStock()
 /**
  * 取商品排行
  */
-function getProductLeaderBoard()
-{
+function getProductLeaderBoard() {
     global $link, $postDT;
     $vendor_code = $postDT["vendor_code"];
     $sql = "select * from product_leaderboard where vendor_code='$vendor_code' ORDER BY count DESC";
@@ -514,12 +509,12 @@ function getProductLeaderBoard()
     return $data;
 }
 
-function getSalesProductLeaderBoard(){
+function getSalesProductLeaderBoard() {
     global $link, $postDT;
     $custom_code = $postDT["custom_code"];
     $sql = "select * from sales_leaderboard where custom_code='$custom_code' order BY  count DESC";
     $result = $link->query($sql);
-    while($row = $result->fetch_array(MYSQLI_ASSOC)){
+    while ($row = $result->fetch_array(MYSQLI_ASSOC)) {
         $data[] = array(
             "product_code" => $row["product_code"],
             "product_name" => $row["product_name"]
