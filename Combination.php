@@ -34,15 +34,15 @@ switch ($func) {
 
 function qryAllCombination() {
     global $link;
-    $sql = "select b.name, a.stock_code, c.group_name, c.group_num
+    $sql = "select b.name as unit_name, a.name, a.code, c.group_name, c.group_num
             from stockinfo a
             inner join product_unit b on b.SN = a.unit
-            inner join combineinfo c on c.stock_code = a.stock_code
-            where is_combine = 'true'";
+            inner join combineinfo c on c.stock_code = a.code
+            group by a.code, c.group_num";
     $result = $link->query($sql);
     while ($row = $result->fetch_array(MYSQLI_ASSOC)) {
         $data[] = array(
-            "stock_code" => $row["stock_code"],
+            "stock_code" => $row["code"],
             "stock_name" => $row["name"],
             "stock_unit_name" => $row["unit_name"],
             "group_name" => $row["group_name"],
@@ -93,11 +93,11 @@ function saveCombination() {
     global $link, $postDT;
     $saveData = json_decode(json_encode($postDT["saveData"]), true);
 
-    $s1 = "select MAX(group_num) as group_num from combineinfo";
+    $s1 = "select COALESCE(MAX(group_num),0) group_num from combineinfo";
     $r1 = $link->query($s1);
-    $max_group_num = $r1["group_num"];
+    $dt = $r1->fetch_array(MYSQLI_ASSOC);
+    $max_group_num = $dt["group_num"];
     $max_group_num++;
-
 
     for ($i = 0; $i < count($saveData); $i++) {
 
@@ -119,7 +119,7 @@ function saveCombination() {
             $group_num = $max_group_num;
         }
 
-        $sql = "insert into combineinfo (stock_code, comb_code, `count`, group_name, group_num) 
+        $sql = "insert into combineinfo (stock_code, comb_code, `count`, group_name, group_num)
                 VALUES ('$stock_code', '$comb_code', '$count', '$group_name', '$group_num')";
         $result = $link->query($sql);
     }
