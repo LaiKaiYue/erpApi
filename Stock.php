@@ -68,27 +68,27 @@ function getStockSQL()
 {
     global $link;
     $sql = "SELECT
-            stockInfo.`code` AS `code`,
-            stockInfo.vendors_code AS vendors_code,
+            stockinfo.`code` AS `code`,
+            stockinfo.vendors_code AS vendors_code,
             product_category.`Name` AS category,
-            stockInfo.`name` AS `name`,
+            stockinfo.`name` AS `name`,
             product_unit.`Name` AS unit,
-            stockInfo.selling_price AS selling_price,
-            stockInfo.safe_stock AS safe_stock,
-            stockInfo.stock_num AS stock_num,
-            stockInfo.unit_cost AS unit_cost,
-            stockInfo.remark AS remark,
-            stockInfo.description AS description,
-            stockInfo.update_date AS update_date,
-            stockInfo.`enable` AS `enable`
+            stockinfo.selling_price AS selling_price,
+            stockinfo.safe_stock AS safe_stock,
+            stockinfo.stock_num AS stock_num,
+            stockinfo.unit_cost AS unit_cost,
+            stockinfo.remark AS remark,
+            stockinfo.description AS description,
+            stockinfo.update_date AS update_date,
+            stockinfo.`enable` AS `enable`
             FROM
-            stockInfo
-            INNER JOIN product_unit ON product_unit.SN = stockInfo.unit
-            INNER JOIN product_category ON product_category.SN = stockInfo.category
+            stockinfo
+            INNER JOIN product_unit ON product_unit.SN = stockinfo.unit
+            INNER JOIN product_category ON product_category.SN = stockinfo.category
             WHERE
-            stockInfo.`enable` = 'true'
+            stockinfo.`enable` = 'true'
             ORDER BY
-            stockInfo.code ASC";
+            stockinfo.code ASC";
     $result = $link->query($sql);
 
     return $result;
@@ -101,7 +101,7 @@ function getStockSQL()
 function getStockLastSN()
 {
     global $link;
-    $sql = "select SN from stockInfo order by SN DESC limit 1";
+    $sql = "select SN from stockinfo order by SN DESC limit 1";
     $result = $link->query($sql);
     $row = $result->fetch_assoc();
     $link->close();
@@ -194,27 +194,27 @@ function getOneStock()
     global $link, $postDT;
     $code = $postDT["code"];
     $sql = "SELECT
-            stockInfo.`code` AS `code`,
-            stockInfo.vendors_code AS vendors_code,
+            stockinfo.`code` AS `code`,
+            stockinfo.vendors_code AS vendors_code,
             product_category.`Name` AS category,
-            stockInfo.`name` AS `name`,
+            stockinfo.`name` AS `name`,
             product_unit.`Name` AS unit,
-            stockInfo.selling_price AS selling_price,
-            stockInfo.safe_stock AS safe_stock,
-            stockInfo.stock_num AS stock_num,
-            stockInfo.unit_cost AS unit_cost,
-            stockInfo.excluded_tax_total AS excluded_tax_total,
-            stockInfo.tax AS tax,
-            stockInfo.remark AS remark,
-            stockInfo.description AS description,
-            stockInfo.update_date AS update_date,
-            stockInfo.`enable` AS `enable`
+            stockinfo.selling_price AS selling_price,
+            stockinfo.safe_stock AS safe_stock,
+            stockinfo.stock_num AS stock_num,
+            stockinfo.unit_cost AS unit_cost,
+            stockinfo.excluded_tax_total AS excluded_tax_total,
+            stockinfo.tax AS tax,
+            stockinfo.remark AS remark,
+            stockinfo.description AS description,
+            stockinfo.update_date AS update_date,
+            stockinfo.`enable` AS `enable`
             FROM
-            stockInfo
-            INNER JOIN product_unit ON product_unit.SN = stockInfo.unit
-            INNER JOIN product_category ON product_category.SN = stockInfo.category
+            stockinfo
+            INNER JOIN product_unit ON product_unit.SN = stockinfo.unit
+            INNER JOIN product_category ON product_category.SN = stockinfo.category
             WHERE
-            stockInfo.`enable` = 'true' and stockInfo.`code` = '$code' limit 1";
+            stockinfo.`enable` = 'true' and stockinfo.`code` = '$code' limit 1";
 
     $result = $link->query($sql);
     if ($result->num_rows > 0) {
@@ -289,29 +289,29 @@ function getVendorProduct()
     $code = $postDT["code"];
 
     $sql = "SELECT
-            stockInfo.`code` AS `code`,
-            stockInfo.vendors_code AS vendors_code,
+            stockinfo.`code` AS `code`,
+            stockinfo.vendors_code AS vendors_code,
             product_category.`Name` AS category,
-            stockInfo.`name` AS `name`,
+            stockinfo.`name` AS `name`,
             product_unit.`Name` AS unit,
-            stockInfo.selling_price AS selling_price,
-            stockInfo.safe_stock AS safe_stock,
-            stockInfo.stock_num AS stock_num,
-            stockInfo.unit_cost AS unit_cost,
-            stockInfo.excluded_tax_total AS excluded_tax_total,
-            stockInfo.tax AS tax,
-            stockInfo.remark AS remark,
-            stockInfo.description AS description,
-            stockInfo.update_date AS update_date,
-            stockInfo.`enable` AS `enable`
+            stockinfo.selling_price AS selling_price,
+            stockinfo.safe_stock AS safe_stock,
+            stockinfo.stock_num AS stock_num,
+            stockinfo.unit_cost AS unit_cost,
+            stockinfo.excluded_tax_total AS excluded_tax_total,
+            stockinfo.tax AS tax,
+            stockinfo.remark AS remark,
+            stockinfo.description AS description,
+            stockinfo.update_date AS update_date,
+            stockinfo.`enable` AS `enable`
             FROM
-            stockInfo
-            INNER JOIN product_unit ON product_unit.SN = stockInfo.unit
-            INNER JOIN product_category ON product_category.SN = stockInfo.category
+            stockinfo
+            INNER JOIN product_unit ON product_unit.SN = stockinfo.unit
+            INNER JOIN product_category ON product_category.SN = stockinfo.category
             WHERE
-            stockInfo.`enable` = 'true' and stockInfo.vendors_code LIKE '%$code%'
+            stockinfo.`enable` = 'true' and stockinfo.vendors_code LIKE '%$code%'
             ORDER BY
-            stockInfo.code ASC";
+            stockinfo.code ASC";
     $result = $link->query($sql);
     if ($result->num_rows > 0) {
         while ($row = $result->fetch_assoc()) {
@@ -358,7 +358,7 @@ function InsertStock()
     $update_date = date("Y-m-d H:i:s");
     $enable = "true";
 
-    $sql = "insert into stockInfo (code, vendors_code, category, name, unit, selling_price, safe_stock, stock_num, unit_cost, excluded_tax_total, tax, remark, description, update_date, enable ) values
+    $sql = "insert into stockinfo (code, vendors_code, category, name, unit, selling_price, safe_stock, stock_num, unit_cost, excluded_tax_total, tax, remark, description, update_date, enable ) values
             ('$code', '$vendors_code', '$category', '$name', '$unit', '$selling_price', '$safe_stock', '$stock_num', '$unit_cost', '$excluded_tax_total', '$tax', '$remark',
             '$description', '$update_date', '$enable')";
     $result = $link->query($sql);
@@ -389,7 +389,7 @@ function UpdateStock()
     $update_date = date("Y-m-d H:i:s");
     $enable = "true";
 
-    $sql = "update stockInfo set vendors_code='$vendors_code', category='$category', name='$name', unit='$unit', selling_price='$selling_price',
+    $sql = "update stockinfo set vendors_code='$vendors_code', category='$category', name='$name', unit='$unit', selling_price='$selling_price',
             safe_stock='$safe_stock', stock_num='$stock_num', unit_cost='$unit_cost', excluded_tax_total='$excluded_tax_total', tax='$tax', remark='$remark', description='$description', update_date='$update_date',
             enable='$enable' where code='$code'";
 
@@ -407,7 +407,7 @@ function DeleteStock()
     global $postDT, $link;
     $code = $postDT["code"];
     $enable = "false";
-    $sql = "update stockInfo set enable='$enable' where code='$code'";
+    $sql = "update stockinfo set enable='$enable' where code='$code'";
     $result = $link->query($sql);
     $link->close();
     return $result;
@@ -421,7 +421,7 @@ function DeleteAllStock()
 {
     global $link;
     $enable = "false";
-    $sql = "update stockInfo set enable='$enable'";
+    $sql = "update stockinfo set enable='$enable'";
     $result = $link->query($sql);
     $link->close();
     return $result;
