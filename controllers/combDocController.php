@@ -9,6 +9,7 @@
 require_once "../routes/combinDoc.php";
 require_once "../common/tools.php";
 require_once "../model/db.php";
+use Underscore\Types\Arrays;
 
 function qryCombProduct(){
     global $db;

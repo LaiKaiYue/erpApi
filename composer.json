@@ -1,0 +1,12 @@
+{
+    "name": "lai.kaiyue/erp-api",
+    "authors": [
+        {
+            "name": "lai.kaiyue",
+            "email": "asiabell115@gmail.com"
+        }
+    ],
+    "require": {
+        "anahkiasen/underscore-php": "^2.0"
+    }
+}
