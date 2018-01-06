@@ -14,8 +14,8 @@ switch ($func) {
         $result = qryAllCombDocMn();
         echo json_encode($result);
         break;
-    case "qryOneCombDocMn":
-        $result = qryOneCombDocMn();
+    case "qryOneCombDocMnByOrderNum":
+        $result = qryOneCombDocMnByOrderNum();
         echo json_encode($result);
         break;
     case "qryCombDocDtByOrderNum":

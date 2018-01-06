@@ -19,7 +19,7 @@ function qryAllCombDocMn() {
     return $dt === false ? $db->getErrorMessage() : $dt;
 }
 
-function qryOneCombDocMn() {
+function qryOneCombDocMnByOrderNum() {
     global $db, $postDT;
     $order_num = $postDT["order_num"];
 
