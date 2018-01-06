@@ -74,8 +74,7 @@ switch ($func) {
 /**
  * 取所有進貨單
  */
-function getAllPurchase()
-{
+function getAllPurchase() {
     global $link;
 
     $s1 = "select * from purchase_header ORDER BY order_number ASC";
@@ -99,15 +98,17 @@ function getAllPurchase()
     return $data;
 }
 
-// 取廠商未結進貨單
-function getVendorNoPaymentPurchase(){
+/**
+ * 取廠商未結進貨單
+ */
+function getVendorNoPaymentPurchase() {
     global $link, $postDT;
     $vendor_code = $postDT["vendor_code"];
     $sql = "SELECT a.*, b.closing_date FROM purchase_header AS a 
 INNER JOIN vendorsinfo AS b ON b.`code` = a.vendor_code 
 where a.status = '0' and a.vendor_code = '$vendor_code'";
     $result = $link->query($sql);
-    while($row = $result->fetch_array(MYSQLI_ASSOC)){
+    while ($row = $result->fetch_array(MYSQLI_ASSOC)) {
         $data[] = array(
             "order_number" => $row["order_number"],
             "vendor_code" => $row["vendor_code"],
@@ -130,8 +131,7 @@ where a.status = '0' and a.vendor_code = '$vendor_code'";
 /**
  * 取單一進貨單
  */
-function getOnePurchase()
-{
+function getOnePurchase() {
     global $link, $postDT;
     $order_number = $postDT["order_number"];
     $s1 = "select * from purchase_header where order_number = '$order_number'";
@@ -158,8 +158,7 @@ function getOnePurchase()
 /**
  * 取進貨單商品資料
  */
-function getOnePurchase_body()
-{
+function getOnePurchase_body() {
     global $link, $postDT;
     $order_number = $postDT["order_number"];
     $s = "SELECT * FROM purchase_body WHERE order_number='$order_number'";
@@ -186,8 +185,7 @@ function getOnePurchase_body()
 /**
  * 產生進貨單號
  */
-function getPurchaseLastOrderNumber()
-{
+function getPurchaseLastOrderNumber() {
     global $link;
 
     $code = 0;
@@ -201,10 +199,10 @@ function getPurchaseLastOrderNumber()
     $code = substr($order_number, -3); //取末三碼
     $code = (int)$code;
     $code++;
-    if ($code < 10) $code = "00" . $code;
-    else if ($code < 100) $code = "0" . $code;
+    if ($code < 10) $code = "00".$code;
+    else if ($code < 100) $code = "0".$code;
 
-    $order_number = $todayStr . $code;
+    $order_number = $todayStr.$code;
 
     return $order_number;
 }
@@ -212,8 +210,7 @@ function getPurchaseLastOrderNumber()
 /**
  * 新增進貨單
  */
-function InsertPurchase()
-{
+function InsertPurchase() {
     global $link, $postDT;
     $product = json_decode(json_encode($postDT["product"]), true);
 
@@ -229,18 +226,17 @@ function InsertPurchase()
     $included_tax_total = $postDT["included_tax_total"];
     $remark = $postDT["remark"];
 
-    if($payment_type == 0){
+    if ($payment_type == 0) {
         $s1 = "insert into purchase_header(order_number, create_date, vendor_code, vendor_name, payment_type, invoice_type, excluded_tax_total, tax, included_tax_total, remark, status) VALUES
         ('$order_number', '$create_date', '$vendor_code', '$vendor_name', '$payment_type', '$invoice_type', '$excluded_tax_total', '$tax', '$included_tax_total', '$remark', '1')";
         $r1 = $link->query($s1);
     }
-    else{
+    else {
         $s1 = "insert into purchase_header(order_number, create_date, vendor_code, vendor_name, payment_type, invoice_type, excluded_tax_total, tax, included_tax_total, remark) VALUES
         ('$order_number', '$create_date', '$vendor_code', '$vendor_name', '$payment_type', '$invoice_type', '$excluded_tax_total', '$tax', '$included_tax_total', '$remark')";
         $r1 = $link->query($s1);
     }
 
-    
 
     // purchase body
     $productLength = count($product);
@@ -255,18 +251,17 @@ function InsertPurchase()
         $sub_tax = $product[$i]["tax"];
         $included_sub_total = $product[$i]["included_tax_total"];
 
-        if($payment_type == 0){
+        if ($payment_type == 0) {
             $s2 = "insert into purchase_body (order_number, product_order, product_code, product_name, product_unit, product_num, unit_cost, excluded_tax_total, tax, included_tax_total, status) VALUES
             ('$order_number','$product_order', '$product_code', '$product_name', '$unit', '$product_num', '$unit_cost', '$excluded_sub_total', '$sub_tax', '$included_sub_total', '1')";
             $r2 = $link->query($s2);
         }
-        else{
+        else {
             $s2 = "insert into purchase_body (order_number, product_order, product_code, product_name, product_unit, product_num, unit_cost, excluded_tax_total, tax, included_tax_total) VALUES
             ('$order_number','$product_order', '$product_code', '$product_name', '$unit', '$product_num', '$unit_cost', '$excluded_sub_total', '$sub_tax', '$included_sub_total')";
             $r2 = $link->query($s2);
         }
 
-        
 
         //紀錄商品進貨次數 製作進貨排名用
         increase_leaderboard_count($product_code, $vendor_code, $product_name, $product_num);
@@ -284,8 +279,7 @@ function InsertPurchase()
  * @param $product_code 商品代號
  * @param $vendor_code 廠商代號
  */
-function increase_leaderboard_count($product_code, $vendor_code, $product_name, $product_num)
-{
+function increase_leaderboard_count($product_code, $vendor_code, $product_name, $product_num) {
     global $link;
     $s3 = "select * from product_leaderboard where product_code='$product_code' and vendor_code='$vendor_code'";
     $r3 = $link->query($s3);
@@ -295,7 +289,8 @@ function increase_leaderboard_count($product_code, $vendor_code, $product_name, 
         $count += (int)$product_num;
         $s4 = "update product_leaderboard set count='$count' where product_code='$product_code' and vendor_code='$vendor_code'";
         $r4 = $link->query($s4);
-    } else {
+    }
+    else {
         $s4 = "insert into product_leaderboard (vendor_code, product_code, product_name) VALUES ('$vendor_code', '$product_code', '$product_name')";
         $r4 = $link->query($s4);
     }
@@ -304,14 +299,13 @@ function increase_leaderboard_count($product_code, $vendor_code, $product_name, 
 /**
  * 加庫存
  */
-function increase_stock_num($product_code, $product_num)
-{
+function increase_stock_num($product_code, $product_num) {
     global $link;
     $s1 = "select stock_num from stockInfo where code='$product_code'";
     $r1 = $link->query($s1);
     $row = $r1->fetch_array(MYSQLI_ASSOC);
     $stock_num = $row["stock_num"];
-    $stock_num += (int)$product_num;
+    $stock_num += (float)$product_num;
 
     $s2 = "update stockInfo set stock_num='$stock_num' where code='$product_code'";
     $r2 = $link->query($s2);
@@ -320,8 +314,7 @@ function increase_stock_num($product_code, $product_num)
 /**
  * 退整張單
  */
-function RemovePurchase_header()
-{
+function RemovePurchase_header() {
     global $link, $postDT;
     $order_number = $postDT["order_number"];
     $type = $postDT["type"]; //0: 刪除，1: 退貨
@@ -356,7 +349,8 @@ function RemovePurchase_header()
 
         $s2 = "delete from purchase_body where order_number = '$order_number'";
         $r2 = $link->query($s2);
-    } else {
+    }
+    else {
         //update func
         //將表頭改狀態為2(退貨)
         $s = "update purchase_header set status='2' where order_number='$order_number'";
@@ -372,8 +366,7 @@ function RemovePurchase_header()
 /**
  * 退商品
  */
-function RemovePurchase_body()
-{
+function RemovePurchase_body() {
     global $link, $postDT;
     $order_number = $postDT["order_number"];
     $pro_code = $postDT["product_code"];
@@ -403,7 +396,8 @@ function RemovePurchase_body()
         //Delete func
         $s1 = "delete from purchase_body where order_number='$order_number' and product_code='$pro_code'";
         $r1 = $link->query($s1);
-    } else {
+    }
+    else {
         //update func
         $s1 = "update purchase_body set status='2' where order_number='$order_number' and product_code='$pro_code'";
         $r1 = $link->query($s1);
@@ -424,8 +418,7 @@ function RemovePurchase_body()
  * @param $pro_code 商品代號
  * @param $vendor_code 廠商代號
  */
-function reduce_leaderboard_count($pro_code, $vendor_code, $product_num)
-{
+function reduce_leaderboard_count($pro_code, $vendor_code, $product_num) {
     global $link;
     $s2 = "select * from product_leaderboard where product_code='$pro_code' and vendor_code='$vendor_code'";
     $r2 = $link->query($s2);
@@ -445,8 +438,7 @@ function reduce_leaderboard_count($pro_code, $vendor_code, $product_num)
  * 扣商品庫存
  * @param $pro_code 商品代號
  */
-function reduce_stock_num($pro_code, $product_num)
-{
+function reduce_stock_num($pro_code, $product_num) {
     global $link;
     $s2 = "select stock_num from stockInfo where code='$pro_code'";
     $r2 = $link->query($s2);
@@ -463,8 +455,7 @@ function reduce_stock_num($pro_code, $product_num)
 /**
  * 更新進貨單金額
  */
-function update_header_price()
-{
+function update_header_price() {
     global $link, $postDT;
     $order_number = $postDT["order_number"];
     $excluded_tax_total = $postDT["excluded_tax_total"];
@@ -481,8 +472,7 @@ function update_header_price()
 /**
  * 取得所有未沖款進貨單
  */
-function getAllPay()
-{
+function getAllPay() {
     global $link, $postDT;
 
     $s1 = "select a.*, b.closing_date from purchase_header a, vendorsInfo b where a.vendor_code = b.code and a.status = '0' ORDER BY a.order_number ASC";
@@ -508,10 +498,9 @@ function getAllPay()
 }
 
 // 結帳
-function payment()
-{
+function payment() {
     global $link, $postDT;
-    $sql = "update purchase_header set status='1' where order_number = '" . $postDT["order_number"] . "'";
+    $sql = "update purchase_header set status='1' where order_number = '".$postDT["order_number"]."'";
     $result = $link->query($sql);
     $link->close();
     return $result;
