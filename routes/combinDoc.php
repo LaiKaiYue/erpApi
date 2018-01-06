@@ -10,6 +10,10 @@ header("Content-Type:text/html; charset=utf-8");
 require_once "../controllers/combDocController.php";
 
 switch ($func) {
+    case "qryCombProduct":
+        $result = qryCombProduct();
+        echo json_encode($result);
+        break;
     case "qryAllCombDocMn":
         $result = qryAllCombDocMn();
         echo json_encode($result);

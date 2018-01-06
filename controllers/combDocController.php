@@ -10,6 +10,13 @@ require_once "../routes/combinDoc.php";
 require_once "../common/tools.php";
 require_once "../model/db.php";
 
+function qryCombProduct(){
+    global $db;
+    $result = $db->execute("select stock.code stock_code, stock.name stock_name from combdoc_mn mn
+                      INNER JOIN stockinfo stock ON stock.code = mn.stock_code GROUP BY mn.stock_code");
+    return $result === false ? $db->getErrorMessage() : $result;
+}
+
 function qryAllCombDocMn() {
     global $db;
     $dt = $db->execute("select * from combdoc_mn mn
