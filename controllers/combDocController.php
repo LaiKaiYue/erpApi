@@ -9,7 +9,6 @@
 require_once "../routes/combinDoc.php";
 require_once "../common/tools.php";
 require_once "../model/db.php";
-use Underscore\Types\Arrays;
 
 function qryCombProduct(){
     global $db;
@@ -20,14 +19,16 @@ function qryCombProduct(){
 
 function qryAllCombDocMn() {
     global $db;
-    $dt = $db->execute("select * from combdoc_mn mn
+    $dt = $db->execute("select mn.order_num, mn.date, stock.name, dt.group_name, mn.number  from combdoc_mn mn
           INNER JOIN stockinfo stock on stock.code = mn.stock_code
-          INNER JOIN product_unit unit on unit.SN = stock.unit");
+          INNER JOIN product_unit unit on unit.SN = stock.unit
+          INNER JOIN combdoc_dt dt on mn.order_num = dt.order_num
+          group by mn.order_num");
 
     return $dt === false ? $db->getErrorMessage() : $dt;
 }
 
-function qryOneCombDocMnByOrderNum() {
+function qryOneCombDocMnByOrderNum() { 
     global $db, $postDT;
     $order_num = $postDT["order_num"];
 
@@ -166,6 +167,3 @@ function delCombDocByOrderNum() {
     $result = $db->transaction($execSQL);
     return $result === false ? $db->getErrorMessage() : $result;
 }
-
-
-?>

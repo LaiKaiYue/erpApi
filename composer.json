@@ -7,6 +7,6 @@
         }
     ],
     "require": {
-        "anahkiasen/underscore-php": "^2.0"
+        "underscore/underscore.php": "^1.3"
     }
 }

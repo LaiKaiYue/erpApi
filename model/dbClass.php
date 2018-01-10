@@ -53,6 +53,11 @@ class DBClass {
         mysqli_close($this->link);
     }
 
+    /**
+     * 執行同transcation下的交易
+     * @param array $la_sql {array} 要執行的sql
+     * @return bool|string 執行結果
+     */
     public function transaction($la_sql = array()) {
         if ($la_sql === []) {
             $this->error_message = "sql command is Empty";
@@ -68,7 +73,7 @@ class DBClass {
                 }
             }
             $this->link->commit();
-            return "save success";
+            return true;
         }
         catch (Exception $e) {
             $this->error_message = $e->getMessage();
@@ -135,48 +140,63 @@ class DBClass {
         $columns = join(",", $tmp_col);
         $data = join(",", $tmp_dat);
 
-        $this->last_sql = "INSERT INTO ".$table."(".$columns.")VALUES(".$data.")";
-
-        mysqli_query($this->link, $this->last_sql);
+        $this->last_sql = "INSERT INTO $table (".$columns.") VALUES (".$data.")";
+        $result = mysqli_query($this->link, $this->last_sql);
 
         if (((is_object($this->link)) ? mysqli_error($this->link) : (($___mysqli_res = mysqli_connect_error()) ? $___mysqli_res : false))) {
-            echo "MySQL Update Error: ".((is_object($this->link)) ? mysqli_error($this->link) : (($___mysqli_res = mysqli_connect_error()) ? $___mysqli_res : false));
+            $this->error_message = "MySQL Insert Error: ".((is_object($this->link)) ? mysqli_error($this->link) : (($___mysqli_res = mysqli_connect_error()) ? $___mysqli_res : false));
+            return false;
         }
         else {
+            if($result == false) $this->error_message = "insert error";
             $this->last_id = mysqli_insert_id($this->link);
-            return $this->last_id;
+            return $result;
         }
     }
 
     /**
      * 這段可以更新資料庫中的資料
      */
-    public function update($table = null, $data_array = null, $key_column = null, $id = null) {
+    public function update($table = null, $data_array = null, $condition = null) {
         if ($table == null) {
             echo "table is null";
             return false;
         }
-        if ($id == null) return false;
-        if ($key_column == null) return false;
+        if ($condition == null) return false;
         if (count($data_array) == 0) return false;
 
-        $id = mysqli_real_escape_string($this->link, $id);
-
         $setting_list = "";
-        for ($xx = 0; $xx < count($data_array); $xx++) {
-            list($key, $value) = each($data_array);
+        $cond_list = "";
+
+        $index = 0;
+        foreach ($data_array as $key => $value) {
             $value = mysqli_real_escape_string($this->link, $value);
             $setting_list .= $key."="."\"".$value."\"";
-            if ($xx != count($data_array) - 1)
-                $setting_list .= ",";
+            if ($index != count($data_array) - 1) {
+                $setting_list .= ", ";
+                $index++;
+            }
         }
-        $this->last_sql = "UPDATE ".$table." SET ".$setting_list." WHERE ".$key_column." = "."\"".$id."\"";
+
+        $index = 0;
+        foreach ($condition as $key => $value) {
+            $value = mysqli_real_escape_string($this->link, $value);
+            $cond_list .= $key."="."\"".$value."\"";
+            if ($index != count($condition) - 1) {
+                $cond_list .= " and ";
+                $index++;
+            }
+        }
+
+        $this->last_sql = "UPDATE ".$table." SET ".$setting_list." WHERE ".$cond_list;
         $result = mysqli_query($this->link, $this->last_sql);
 
         if (((is_object($this->link)) ? mysqli_error($this->link) : (($___mysqli_res = mysqli_connect_error()) ? $___mysqli_res : false))) {
-            echo "MySQL Update Error: ".((is_object($this->link)) ? mysqli_error($this->link) : (($___mysqli_res = mysqli_connect_error()) ? $___mysqli_res : false));
+            $this->error_message = "MySQL Update Error: ".((is_object($this->link)) ? mysqli_error($this->link) : (($___mysqli_res = mysqli_connect_error()) ? $___mysqli_res : false));
+            return false;
         }
         else {
+            if ($result == false) $this->error_message = "update error";
             return $result;
         }
     }
@@ -184,12 +204,32 @@ class DBClass {
     /**
      * 這段可以刪除資料庫中的資料
      */
-    public function delete($table = null, $key_column = null, $id = null) {
+    public function delete($table = null, $condition = null) {
         if ($table === null) return false;
-        if ($id === null) return false;
-        if ($key_column === null) return false;
+        if ($condition === null) return false;
 
-        return $this->execute("DELETE FROM $table WHERE ".$key_column." = "."\"".$id."\"");
+        $index = 0;
+        $cond_list = "";
+        foreach ($condition as $key => $value) {
+            $value = mysqli_real_escape_string($this->link, $value);
+            $cond_list .= $key."="."\"".$value."\"";
+            if ($index != count($condition) - 1) {
+                $cond_list .= " and ";
+                $index++;
+            }
+        }
+
+        $this->last_sql = "DELETE FROM $table WHERE $cond_list";
+        $result = mysqli_query($this->link, $this->last_sql);
+
+        if (((is_object($this->link)) ? mysqli_error($this->link) : (($___mysqli_res = mysqli_connect_error()) ? $___mysqli_res : false))) {
+            $this->error_message = "MySQL Delete Error: ".((is_object($this->link)) ? mysqli_error($this->link) : (($___mysqli_res = mysqli_connect_error()) ? $___mysqli_res : false));
+            return false;
+        }
+        else {
+            if ($result == false) $this->error_message = "delete error";
+            return $result;
+        }
     }
 
     /**
@@ -254,5 +294,3 @@ class DBClass {
         $this->error_message = $error_message;
     }
 }
-
-?>

@@ -6,8 +6,8 @@
  * Time: 下午6:37
  */
 
-header("Content-Type:text/html; charset=utf-8");
 require_once "../controllers/combDocController.php";
+require_once "../common/url.php";
 
 switch ($func) {
     case "qryCombProduct":
