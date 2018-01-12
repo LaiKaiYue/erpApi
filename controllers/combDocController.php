@@ -10,10 +10,14 @@ require_once "../routes/combinDoc.php";
 require_once "../common/tools.php";
 require_once "../model/db.php";
 
-function qryCombProduct(){
+/**
+ * 取可組合商品
+ * @return array|bool|string
+ */
+function qryCombProduct() {
     global $db;
-    $result = $db->execute("select stock.code stock_code, stock.name stock_name from combdoc_mn mn
-                      INNER JOIN stockinfo stock ON stock.code = mn.stock_code GROUP BY mn.stock_code");
+    $result = $db->execute("select stock.name stock_name, stock.code stock_code from combineinfo comb
+                            INNER JOIN stockinfo stock ON stock.code = comb.stock_code GROUP BY comb.stock_code");
     return $result === false ? $db->getErrorMessage() : $result;
 }
 

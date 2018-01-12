@@ -8,3 +8,4 @@
 
 require_once "combinDoc.php";
 require_once "Combination.php";
+require_once "customs.php";

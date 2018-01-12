@@ -105,7 +105,12 @@ class DBClass {
                 $result_set[$xx] = mysqli_fetch_assoc($result);
             }
             if (isset($result_set)) {
-                return $result_set;
+                if(count($result_set) == 0){
+                    return true;
+                }
+                else{
+                    return $result_set;
+                }
             }
             else {
                 $this->error_message = "result: zero";
