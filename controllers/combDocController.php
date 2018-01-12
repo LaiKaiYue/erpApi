@@ -36,7 +36,7 @@ function qryOneCombDocMnByOrderNum() {
     global $db, $postDT;
     $order_num = $postDT["order_num"];
 
-    $dt = $db->execute("select * from combdoc_mn mn
+    $dt = $db->execute("select mn.date, mn.stock_code, stock.name as stock_name, unit.`Name` as unit_name, mn.number from combdoc_mn mn
           INNER JOIN stockinfo stock ON stock.code = mn.stock_code
           INNER JOIN product_unit unit ON unit.SN = stock.unit
           WHERE mn.order_num = '$order_num'");
@@ -48,7 +48,7 @@ function qryCombDocDtByOrderNum() {
     global $db, $postDT;
     $order_num = $postDT["order_num"];
 
-    $dt = $db->execute("select * from combdoc_dt dt
+    $dt = $db->execute("select dt.group_name, dt.comb_code, stock.`name` as comb_name, dt.count, unit.name as unit_name from combdoc_dt dt
           INNER JOIN stockinfo stock ON stock.code = dt.comb_code
           INNER JOIN product_unit unit ON unit.SN = stock.unit
           WHERE dt.order_num = '$order_num'");
