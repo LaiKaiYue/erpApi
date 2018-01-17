@@ -6,7 +6,6 @@
  * Time: 下午10:03
  */
 require_once "../model/db.php";
-require_once "../vendor/autoload.php";
 
 function qryAllCombination() {
     global $db;

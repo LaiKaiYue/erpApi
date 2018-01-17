@@ -370,7 +370,7 @@ function RemovePurchase_body() {
     global $link, $postDT;
     $order_number = $postDT["order_number"];
     $pro_code = $postDT["product_code"];
-    $pro_type = $postDT["type"]; //0: 刪除，1: 退貨
+    $pro_type = $postDT["type"]; //0: 刪除, 1: 結帳, 2: 退貨
 //    $RmProductAry = json_decode(json_encode($postDT["RmProductAry"]), true);
 
     $s = "select vendor_code from purchase_header where order_number='$order_number'";

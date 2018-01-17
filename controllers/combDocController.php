@@ -9,6 +9,7 @@
 require_once "../routes/combinDoc.php";
 require_once "../common/tools.php";
 require_once "../model/db.php";
+require_once "../vendor/autoload.php";
 
 /**
  * 取可組合商品
@@ -32,7 +33,7 @@ function qryAllCombDocMn() {
     return $dt === false ? $db->getErrorMessage() : $dt;
 }
 
-function qryOneCombDocMnByOrderNum() { 
+function qryOneCombDocMnByOrderNum() {
     global $db, $postDT;
     $order_num = $postDT["order_num"];
 
@@ -110,7 +111,7 @@ function updCombDocMnByOrderNum() {
     global $db, $postDT;
     $tools = new tools();
     $order_num = $postDT["order_num"];
-    $comb_group_num = $postDT["group_num"];
+//    $comb_group_num = $postDT["group_num"];
     $new_combin_number = $postDT["number"];
     $upd_dat = $tools->genInsOrUpdDateTime();
     $execSQL = array();
@@ -119,7 +120,7 @@ function updCombDocMnByOrderNum() {
 
     $oldCombDocInfo = $db->execute("select * from combdoc_mn mn 
                   INNER JOIN combdoc_dt dt ON mn.order_num = dt.order_num
-                  WHERE mn.order_num = '$order_num' and dt.group_num = '$comb_group_num'");
+                  WHERE mn.order_num = '$order_num'");
     $old_combin_number = $oldCombDocInfo[0]["number"];
     $stock_code = $oldCombDocInfo[0]["stock_code"];
 
@@ -156,16 +157,31 @@ function updCombDocMnByOrderNum() {
     return $result === false ? $db->getErrorMessage() : $result;
 }
 
+/**
+ * 刪除組合單，刪除加庫存
+ * @param {string} order_num: 訂單編號
+ * @return bool|string
+ */
 function delCombDocByOrderNum() {
     global $db, $postDT;
     $order_num = $postDT["order_num"];
-
-    $qryResult = $db->query("combdoc_mn", "order_num='$order_num'");
-    if(count($qryResult) == 0){
-        return "this order number not found";
-    }
-
     $execSQL = array();
+    //查主檔資訊
+    $qryResult = $db->query("combdoc_mn", "order_num='$order_num'");
+    $number = $qryResult[0]["number"];
+    if (count($qryResult) == 0) {
+        return "Order number is not found";
+    }
+    $upd_comb_num = 0;
+    //查明細資訊
+    $qryDtResult = $db->query("combdoc_dt", "order_num='$order_num'");
+    __::each($qryDtResult, function ($dt) use (&$execSQL, $db, $number, &$upd_comb_num) {
+        $comb_code = $dt["comb_code"];
+        $stock_num = $db->query("stockinfo", "code='$comb_code'")[0]['stock_num'];
+        $upd_stock_num = bcadd(bcmul($number, $dt["count"]), $stock_num);
+        $execSQL[] = "update stockinfo set stock_num='$upd_stock_num' where code='$comb_code'";
+    });
+
     $execSQL[] = "delete from combdoc_mn where order_num = '$order_num'";
     $execSQL[] = "delete from combdoc_dt WHERE order_num = '$order_num'";
     $result = $db->transaction($execSQL);
