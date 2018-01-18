@@ -187,14 +187,24 @@ function delCombDocByOrderNum() {
     $order_num = $postDT["order_num"];
     $tools = new tools();
     $execSQL = array();
+
     //查主檔資訊
     $qryResult = $db->query("combdoc_mn", "order_num='$order_num'");
     $number = $qryResult[0]["number"];
+    $stock_code = $qryResult[0]["stock_code"];
     if (count($qryResult) == 0) {
         return "Order number is not found";
     }
-    $upd_comb_num = 0;
+
+    //查產品資訊
+    $stockInfo = $db->query("stockinfo", "code='$stock_code'")[0];
+    $stock_num = $stockInfo["stock_num"];
+    //更新產品庫存
+    $upd_stock_num = $tools->trimRightZero(bcsub($stock_num, $number, $scale));
+    $execSQL[] = "update stockinfo set stock_num='$upd_stock_num' WHERE code='$stock_code'";
+
     //查明細資訊
+    $upd_comb_num = 0;
     $qryDtResult = $db->query("combdoc_dt", "order_num='$order_num'");
     __::each($qryDtResult, function ($dt) use (&$execSQL, $db, $number, $upd_comb_num, $scale, $tools) {
         $comb_code = $dt["comb_code"];
