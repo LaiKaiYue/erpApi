@@ -183,8 +183,9 @@ function updCombDocMnByOrderNum() {
  * @return bool|string
  */
 function delCombDocByOrderNum() {
-    global $db, $postDT;
+    global $db, $postDT, $scale;
     $order_num = $postDT["order_num"];
+    $tools = new tools();
     $execSQL = array();
     //查主檔資訊
     $qryResult = $db->query("combdoc_mn", "order_num='$order_num'");
@@ -195,10 +196,11 @@ function delCombDocByOrderNum() {
     $upd_comb_num = 0;
     //查明細資訊
     $qryDtResult = $db->query("combdoc_dt", "order_num='$order_num'");
-    __::each($qryDtResult, function ($dt) use (&$execSQL, $db, $number, &$upd_comb_num) {
+    __::each($qryDtResult, function ($dt) use (&$execSQL, $db, $number, $upd_comb_num, $scale, $tools) {
         $comb_code = $dt["comb_code"];
         $stock_num = $db->query("stockinfo", "code='$comb_code'")[0]['stock_num'];
-        $upd_stock_num = bcadd(bcmul($number, $dt["count"], 5), $stock_num, 5);
+        $upd_stock_num = bcadd(bcmul($number, $dt["count"], $scale), $stock_num, $scale);
+        $tools->trimRightZero($upd_stock_num);
         $execSQL[] = "update stockinfo set stock_num='$upd_stock_num' where code='$comb_code'";
     });
 
