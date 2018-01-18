@@ -17,6 +17,10 @@ class tools {
     public function genInsOrUpdDateTime() {
         return date("Y-m-d H:i:s");
     }
+
+    public function trimRightZero($str){
+        return rtrim(rtrim($str, '0'), '.');
+    }
 }
 
 ?>

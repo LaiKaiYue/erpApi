@@ -11,6 +11,7 @@ $dbhost = $config['database']['host'];
 $dbuser = $config['database']['username'];
 $dbpass = $config['database']['password'];
 $dbname = $config['database']['dbname'];
+$scale = $config["setting"]["scale"];   //小數位數
 
 $backup_dbhost = $config['backupDB']['host'];
 $backup_dbuser = $config['backupDB']['username'];
