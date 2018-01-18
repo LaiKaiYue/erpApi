@@ -122,9 +122,22 @@ function updCombDocMnByOrderNum() {
                   INNER JOIN combdoc_dt dt ON mn.order_num = dt.order_num
                   WHERE mn.order_num = '$order_num'");
     $old_combin_number = $oldCombDocInfo[0]["number"];
+    $old_date = $oldCombDocInfo[0]["date"];
     $stock_code = $oldCombDocInfo[0]["stock_code"];
 
-    if ($new_combin_number == $old_combin_number) return "save success";
+    //數量一樣，不計算庫存
+    if ($new_combin_number == $old_combin_number) {
+        //日期不一樣，僅修改日期
+        if ($old_date != $date) {
+            $updData["date"] = $date;
+            $cond["order_num"] = $order_num;
+            $result = $db->update("combdoc_mn", $updData, $cond);
+            return $result === false ? $db->getErrorMessage() : $result;
+        }
+        else{
+            return true;
+        }
+    }
 
     $mnStockIndex = array_search($stock_code, array_column($allStock, "code"));
     if ($mnStockIndex === false) return "this order mn product not find";
