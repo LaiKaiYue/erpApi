@@ -111,7 +111,7 @@ function updCombDocMnByOrderNum() {
     global $db, $postDT;
     $tools = new tools();
     $order_num = $postDT["order_num"];
-//    $comb_group_num = $postDT["group_num"];
+    $date = $postDT["date"];
     $new_combin_number = $postDT["number"];
     $upd_dat = $tools->genInsOrUpdDateTime();
     $execSQL = array();
@@ -136,7 +136,7 @@ function updCombDocMnByOrderNum() {
     $mnUpdStockNumber = bcadd((float)$mnStockInfo["stock_num"], (float)$mnStockDiff, 5);
     //更新主檔庫存
     $execSQL[] = "update stockinfo set stock_num='$mnUpdStockNumber', update_date='$upd_dat' where code='$stock_code'";
-    $execSQL[] = "update combdoc_mn set `number`='$new_combin_number', upd_dat='$upd_dat' where order_num='$order_num'";
+    $execSQL[] = "update combdoc_mn set `date`='$date', `number`='$new_combin_number', upd_dat='$upd_dat' where order_num='$order_num'";
 
     //計算明細庫存
     //增加主檔產品要扣明細原料數量（明細數量跟主檔數量相反）: 0 - 主檔產品數量差異
@@ -178,7 +178,7 @@ function delCombDocByOrderNum() {
     __::each($qryDtResult, function ($dt) use (&$execSQL, $db, $number, &$upd_comb_num) {
         $comb_code = $dt["comb_code"];
         $stock_num = $db->query("stockinfo", "code='$comb_code'")[0]['stock_num'];
-        $upd_stock_num = bcadd(bcmul($number, $dt["count"]), $stock_num);
+        $upd_stock_num = bcadd(bcmul($number, $dt["count"], 5), $stock_num, 5);
         $execSQL[] = "update stockinfo set stock_num='$upd_stock_num' where code='$comb_code'";
     });
 
