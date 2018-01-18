@@ -200,7 +200,7 @@ function delCombDocByOrderNum() {
         $comb_code = $dt["comb_code"];
         $stock_num = $db->query("stockinfo", "code='$comb_code'")[0]['stock_num'];
         $upd_stock_num = bcadd(bcmul($number, $dt["count"], $scale), $stock_num, $scale);
-        $tools->trimRightZero($upd_stock_num);
+        $upd_stock_num = $tools->trimRightZero($upd_stock_num);
         $execSQL[] = "update stockinfo set stock_num='$upd_stock_num' where code='$comb_code'";
     });
 
