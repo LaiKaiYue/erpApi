@@ -30,5 +30,3 @@ if (!$db) {
 
 $postDT = json_decode(file_get_contents("php://input"), true);
 $func = ($postDT["func"] == "") ? $_GET["func"] : $postDT["func"];
-
-?>

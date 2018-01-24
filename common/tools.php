@@ -22,5 +22,3 @@ class tools {
         return rtrim(rtrim($str, '0'), '.');
     }
 }
-
-?>
