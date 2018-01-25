@@ -6,7 +6,7 @@
  * Time: 上午1:01
  */
 
-require_once "../controllers/dismantleController.php";
+require_once "../controllers/dismantleDocController.php";
 require_once "../common/url.php";
 
 switch ($func) {

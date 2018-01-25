@@ -18,6 +18,10 @@ switch ($func) {
         $result = qryDismantleByStockCode();
         echo json_encode($result);
         break;
+    case "qryDismGroupNameByStockCode":
+        $result = qryDismGroupNameByStockCode();
+        echo json_encode($result);
+        break;
     case "saveDismantle":
         $result = saveDismantle();
         echo json_encode($result);
@@ -61,7 +65,7 @@ function qryDismantleByStockCode() {
     //找組合名稱、單位
     $sql = "select b.name, a.stock_code, a.dism_code, a.count, c.Name as unit_name, a.group_name, a.group_num
             from dismantleinfo a
-            inner join stockinfo b b.code = a.dism_code
+            inner join stockinfo b ON b.code = a.dism_code
             inner join product_unit c on c.SN = b.unit
             where a.stock_code = '$stock_code' and a.group_num = '$group_num'";
     $result = $link->query($sql);
@@ -74,7 +78,6 @@ function qryDismantleByStockCode() {
     $dt = $r->fetch_array();
     $stock_name = $dt["name"];
     $stock_unit_name = $dt["Name"];
-
     while ($row = $result->fetch_array(MYSQLI_ASSOC)) {
         $data[] = array(
             "stock_code" => $row["stock_code"],
@@ -88,6 +91,23 @@ function qryDismantleByStockCode() {
             "group_num" => $row["group_num"]
         );
     }
+    $link->close();
+    return $data;
+}
+
+function qryDismGroupNameByStockCode() {
+    global $link, $postDT;
+    $stock_code = $postDT["stock_code"];
+    $sql = "select group_name, group_num from dismantleinfo WHERE stock_code = '$stock_code'
+                    GROUP BY group_num";
+    $result = $link->query($sql);
+    while($row = $result->fetch_assoc()){
+        $data[] = array(
+            "group_name" => $row["group_name"],
+            "group_num" => $row["group_num"]
+        );
+    }
+
     $link->close();
     return $data;
 }
