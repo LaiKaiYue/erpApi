@@ -10,3 +10,4 @@ require_once "combinDoc.php";
 require_once "combination.php";
 require_once "customs.php";
 require_once "dismantleDoc.php";
+require_once "dismantle.php";

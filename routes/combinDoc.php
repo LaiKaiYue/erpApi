@@ -6,7 +6,7 @@
  * Time: 下午6:37
  */
 
-require_once "../controllers/combDocController.php";
+require_once "../controllers/combinDocController.php";
 require_once "../common/url.php";
 
 switch ($func) {
