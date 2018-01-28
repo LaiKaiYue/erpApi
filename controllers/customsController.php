@@ -38,8 +38,8 @@ function getAllCustoms() {
  */
 function getCustomsLastSN() {
     global $db;
-    $result = $db->query("customerinfo", 1, "SN DESC", "SN", 1);
-    $SN = $result["SN"] + 1;
+    $result = $db->query("customerinfo", "1", "SN DESC", "SN", "limit 1");
+    $SN = $result[0]["SN"] + 1;
     if ($SN < 10) $SN = "C000".$SN;
     else if ($SN < 100) $SN = "C00".$SN;
     else if ($SN < 1000) $SN = "C0".$SN;

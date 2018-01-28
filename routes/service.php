@@ -6,8 +6,9 @@
  * Time: 下午10:07
  */
 
-require_once "combinDoc.php";
-require_once "combination.php";
-require_once "customs.php";
-require_once "dismantleDoc.php";
-require_once "dismantle.php";
+$files = glob('*.{php}', GLOB_BRACE);
+foreach ($files as $file) {
+    if ($file != "service.php") {
+        require_once $file;
+    }
+}

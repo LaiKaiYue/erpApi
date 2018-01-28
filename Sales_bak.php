@@ -519,4 +519,3 @@ function payment(){
     return $result;
 }
 
-?>

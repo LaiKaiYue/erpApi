@@ -16,7 +16,7 @@ require_once "../vendor/autoload.php";
  */
 function qryAllDismantle() {
     global $db;
-    $result = $db->execute("select b.name as unit_name, a.name, a.code, c.group_name, c.group_num
+    $result = $db->execute("select b.name as stock_unit_name, a.name as stock_name, a.code as stock_code, c.group_name, c.group_num
             from stockinfo a
             inner join product_unit b on b.SN = a.unit
             inner join dismantleinfo c on c.stock_code = a.code
@@ -35,8 +35,8 @@ function qryDismantleByStockCode() {
     $stock_code = $postDT["stock_code"];
     $group_num = $postDT["group_num"];
 
-    //找組合名稱、單位
-    $result = $db->execute("select b.name, a.stock_code, a.dism_code, a.count, c.Name as unit_name, a.group_name, a.group_num
+    //找拆解名稱、單位
+    $result = $db->execute("select b.name as dism_name, a.stock_code, a.dism_code, a.count, c.Name as dism_unit_name, a.group_name, a.group_num
             from dismantleinfo a
             inner join stockinfo b ON b.code = a.dism_code
             inner join product_unit c on c.SN = b.unit
@@ -68,7 +68,11 @@ function qryDismGroupNameByStockCode() {
     return $result === false ? $db->getErrorMessage() : $result;
 }
 
-
+/**
+ * 儲存拆解關聯
+ * @param array saveData 儲存資料
+ * @return bool|string
+ */
 function saveDismantle() {
     global $db, $postDT;
     $saveData = json_decode(json_encode($postDT["saveData"]), true);
@@ -87,14 +91,7 @@ function saveDismantle() {
         //修改
         if ($group_num != "-1") {
             if ($i == 0) {
-                $execSQL[] =
-                $s = "delete from dismantleinfo where stock_code='$stock_code' and group_num='$group_num'";
-                $cond = array(
-                    "stock_code" => $stock_code,
-                    "group_num" => $group_num
-                );
-                $result = $db->delete("dismantleinfo", $cond);
-                if ($result === false) return $db->getErrorMessage();
+                $execSQL[] = "delete from dismantleinfo where stock_code='$stock_code' and group_num='$group_num'";
             }
         }
         //新增
@@ -102,15 +99,10 @@ function saveDismantle() {
             $group_num = $max_group_num;
         }
 
-        $data_array[] = array(
-            "stock_code" => $stock_code,
-            "dism_code" => $dism_code,
-            "count" => $count,
-            "group_name" => $group_name,
-            "group_num" => $group_num
-        );
-        $result = $db->insert("dismantleinfo", $data_array);
+        $execSQL[] = "insert into dismantleinfo (stock_code, dism_code, `count`, group_name, group_num) 
+                VALUES ('$stock_code', '$dism_code', '$count', '$group_name', '$group_num')";
     }
+    $result = $db->transaction($execSQL);
     return $result === false ? $db->getErrorMessage() : $result;
 }
 
