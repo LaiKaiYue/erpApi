@@ -311,6 +311,6 @@ function qryLastSaleStockInfoByCustomCode(){
 
     $result = $db->execute("select dt.discount_type from sales_header mn INNER JOIN sales_body dt ON mn.order_number = dt.order_number
                               WHERE mn.custom_code = '$custom_code' and dt.product_code = '$stock_code' ORDER BY dt.SN DESC limit 1");
-    return $result === false ? $db->getErrorMessage() : $result[0];
+    return $result === false ? $db->getErrorMessage() : $result[0]["discount_type"];
 
 }
