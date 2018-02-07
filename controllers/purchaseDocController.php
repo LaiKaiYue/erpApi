@@ -145,7 +145,7 @@ function InsertPurchase() {
 function increase_leaderboard_count($product_code, $vendor_code, $product_name, $product_num, &$execSQL) {
     global $db;
     $result = $db->query("product_leaderboard", "product_code='$product_code' and vendor_code='$vendor_code'");
-    if (count($result) > 0) {
+    if (count($result) > 0 and $result !== true) {
         $count = $result[0]["count"];
         $count += (int)$product_num;
         $execSQL[] = "update product_leaderboard set count='$count' where product_code='$product_code' and vendor_code='$vendor_code'";

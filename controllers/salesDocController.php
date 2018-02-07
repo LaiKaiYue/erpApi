@@ -132,6 +132,7 @@ function InsertSales() {
         //減少產品庫存
         $stockInfo->reduce_stock_num($product_code, $product_num, $execSQL);
     }
+
     $result = $db->transaction($execSQL);
     return $result === false ? $db->getErrorMessage() : $result;
 }
@@ -144,8 +145,7 @@ function InsertSales() {
 function increase_sales_leaderboard_count($product_code, $custom_code, $product_name, $product_num, &$execSQL) {
     global $db;
     $result = $db->query("sales_leaderboard", "product_code='$product_code' and custom_code='$custom_code'");
-
-    if (count($result) > 0) {
+    if (count($result) > 0 and $result !== true) {
         $count = $result[0]["count"];
         $count += (int)$product_num;
         $execSQL[] = "update sales_leaderboard set count='$count' where product_code='$product_code' and custom_code='$custom_code'";
