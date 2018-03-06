@@ -1,5 +1,6 @@
 <?php
 /**
+ * 進貨單
  * Created by PhpStorm.
  * User: lai.kaiyue
  * Date: 2018/1/28
@@ -162,7 +163,7 @@ function RemovePurchase_header() {
     global $db, $postDT;
     $stockInfo = new stockInfo();
     $order_number = $postDT["order_number"];
-    $type = $postDT["type"]; //0: 刪除，1: 退貨
+    $type = $postDT["type"]; //0: 刪除，1: 結帳、2: 退貨
 
     $result = $db->query("purchase_header", "order_number='$order_number'", "1", "vendor_code");
     $vendor_code = $result[0]["vendor_code"];
@@ -207,40 +208,56 @@ function RemovePurchase_body() {
     global $db, $postDT;
     $stockInfo = new stockInfo();
     $order_number = $postDT["order_number"];
-    $pro_code = $postDT["product_code"];
-    $pro_type = $postDT["type"]; //0: 刪除, 1: 結帳, 2: 退貨
+    $prod_code = $postDT["product_code"];
+    $pro_type = $postDT["type"]; //0: 刪除, 1: 退貨
+    $number = $postDT["number"];
 
     $dt = $db->query("purchase_header", "order_number='$order_number'", "1", "vendor_code");
     $vendor_code = $dt[0]["vendor_code"];
 
-    $row = $db->query("purchase_body", "order_number='$order_number' and product_code='$pro_code'", "1", "product_num, status");
-    $product_num = $row[0]["product_num"];
+    $row = $db->query("purchase_body", "order_number='$order_number' and product_code='$prod_code'", "1", "product_num, status");
+    $product_num = $row[0]["product_num"];  //退貨數量
     $status = $row[0]["status"];
     $execSQL = array();
     //不是退貨扣庫存
     if ($status != 2) {
         //扣除商品進貨次數，製作進貨排名用
-        reduce_leaderboard_count($pro_code, $vendor_code, $product_num, $execSQL);
+        reduce_leaderboard_count($prod_code, $vendor_code, $product_num, $execSQL);
         //扣庫存
-        $stockInfo->reduce_stock_num($pro_code, $product_num, $execSQL);
+        $stockInfo->reduce_stock_num($prod_code, $product_num, $execSQL);
     }
 
+    //商除商品
     if ($pro_type == 0) {
-        //Delete func
-        $execSQL[] = "delete from purchase_body where order_number='$order_number' and product_code='$pro_code'";
+        $execSQL[] = "delete from purchase_body where order_number='$order_number' and product_code='$prod_code'";
     }
+    //將商品狀態改為2(退貨)
     else {
-        //update func
-        $execSQL[] = "update purchase_body set status='2' where order_number='$order_number' and product_code='$pro_code'";
+//        $execSQL[] = "update purchase_body set status='2' where order_number='$order_number' and product_code='$pro_code'";
+        insProductReturnDB($order_number, $prod_code, $number, $execSQL);
     }
 
-    //    $productLength = count($RmProductAry);
-    //    for ($i = 0; $i < $productLength; $i++) {
-    //        $pro_code = $RmProductAry[$i]["product_code"];
-    //        $pro_type = $RmProductAry[$i]["type"];
-    //    }
     $result = $db->transaction($execSQL);
     return $result === false ? $db->getErrorMessage() : $result;
+}
+
+/**
+ * 紀錄進貨單退貨資訊
+ * @param $order_number {string} 銷貨單號
+ * @param $prod_code {string} 商品代號
+ * @param $number {number} 退貨數量
+ * @param $execSQL {array} sql
+ */
+function insProductReturnDB($order_number, $prod_code, $number, &$execSQL) {
+    global $db;
+    $tools = new Tools();
+    $result = $db->execute("select mn.vendor_code
+              from purchase_body dt INNER JOIN purchase_header mn ON dt.order_number = mn.order_number
+              where mn.order_number = '$order_number' and dt.product_code = '$prod_code'");
+
+    $ins_dat = $tools->genInsOrUpdDateTime();
+    $execSQL[] = "insert into product_return (vendor_code, stock_code, `number`, doc_type, ins_dat) VALUES 
+                  ('$result[vendor_code]', '$prod_code', '$number', 'purchaseDoc', '$ins_dat')";
 }
 
 /**

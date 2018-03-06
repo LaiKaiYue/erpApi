@@ -1,5 +1,6 @@
 <?php
 /**
+ * 銷貨單
  * Created by PhpStorm.
  * User: lai.kaiyue
  * Date: 2018/1/28
@@ -170,7 +171,7 @@ function RemoveSales_header() {
     //退貨後 減商品庫存
     $execSQL = array();
     $result = $db->query("sales_body", "order_number = '$order_number'");
-    foreach($result as $row){
+    foreach ($result as $row) {
         $product_code = $row["product_code"];
         $product_num = $row["product_num"];
         $status = $row["status"];
@@ -208,35 +209,56 @@ function RemoveSales_body() {
     global $db, $postDT;
     $stockInfo = new stockInfo();
     $order_number = $postDT["order_number"];
-    $pro_code = $postDT["product_code"];
+    $prod_code = $postDT["product_code"];
     $pro_type = $postDT["type"]; //0: 刪除，1: 退貨
+    $number = $postDT["number"];
 
     $dt = $db->query("sales_header", "order_number='$order_number'", "1", "custom_code");
     $custom_code = $dt[0]["custom_code"];
 
-    $row = $db->query("sales_body", "order_number='$order_number' and product_code='$pro_code'", "1", "product_num, status");
+    $row = $db->query("sales_body", "order_number='$order_number' and product_code='$prod_code'", "1", "product_num, status");
     $product_num = $row[0]["product_num"];
     $status = $row[0]["status"];
     $execSQL = array();
     //不是退貨扣庫存
     if ($status != 2) {
         //扣除商品進貨次數，製作進貨排名用
-        reduce_sales_leaderboard_count($pro_code, $custom_code, $product_num, $execSQL);
+        reduce_sales_leaderboard_count($prod_code, $custom_code, $product_num, $execSQL);
         //加庫存
-        $stockInfo->increase_stock_num($pro_code, $product_num, $execSQL);
+        $stockInfo->increase_stock_num($prod_code, $product_num, $execSQL);
     }
 
+    //刪除商品
     if ($pro_type == 0) {
-        //Delete func
-        $execSQL[] = "delete from sales_body where order_number='$order_number' and product_code='$pro_code'";
+        $execSQL[] = "delete from sales_body where order_number='$order_number' and product_code='$prod_code'";
     }
+    //退商品
     else {
-        //update func
-        $execSQL[] = "update sales_body set status='2' where order_number='$order_number' and product_code='$pro_code'";
+//        $execSQL[] = "update sales_body set status='2' where order_number='$order_number' and product_code='$pro_code'";
+        insProductReturnDB($order_number, $prod_code, $number, $execSQL);
     }
 
     $result = $db->transaction($execSQL);
     return $result === false ? $db->getErrorMessage() : $result;
+}
+
+/**
+ * 紀錄銷貨單退貨資訊
+ * @param $order_number {string} 銷貨單號
+ * @param $prod_code {string} 商品代號
+ * @param $number {number} 退貨數量
+ * @param $execSQL {array} sql
+ */
+function insProductReturnDB($order_number, $prod_code, $number, &$execSQL) {
+    global $db;
+    $tools = new Tools();
+    $result = $db->execute("select mn.custom_code
+              from sales_body dt INNER JOIN sales_header mn ON dt.order_number = mn.order_number
+              where mn.order_number = '$order_number' and dt.product_code = '$prod_code'");
+
+    $ins_dat = $tools->genInsOrUpdDateTime();
+    $execSQL[] = "insert into product_return (custom_code, stock_code, `number`, doc_type, ins_dat) VALUES 
+                  ('$result[custom_code]', '$prod_code', '$number', 'salesDoc', '$ins_dat')";
 }
 
 /**
@@ -304,7 +326,7 @@ function sales_payment() {
  * @param string stock_code 商品代號
  * @return array|bool|string
  */
-function qryLastSaleStockInfoByCustomCode(){
+function qryLastSaleStockInfoByCustomCode() {
     global $db, $postDT;
     $custom_code = $postDT["custom_code"];
     $stock_code = $postDT["stock_code"];
