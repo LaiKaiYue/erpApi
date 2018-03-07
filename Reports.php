@@ -22,7 +22,7 @@ switch ($func) {
         $result = getSalesReportInfo();
         echo json_encode($result);
         break;
-            case "getSalesTotal":
+    case "getSalesTotal":
         $result = getSalesTotal();
         echo json_encode($result);
         break;
@@ -82,12 +82,12 @@ function getCustomAnalysis(){
 function getSalesReportInfo(){
     global $link, $postDT;
     $order_number = $postDT["order_number"];
-    $sql = "select mn.create_date, mn.order_number, category.`Name` as category, dt.product_code, dt.product_name, dt.product_num, dt.selling_price, dt.tax, dt.included_tax_total, mn.ship_nos
+    $sql = "select mn.create_date, mn.order_number, category.`Name` as category, dt.product_code, dt.product_name, dt.product_num, dt.discount_type, dt.selling_price, dt.tax, dt.excluded_tax_total, dt.included_tax_total, mn.ship_nos
     from sales_header mn, sales_body dt, stockinfo product, product_category category 
     where mn.order_number = dt.order_number 
     and dt.product_code = product.`code` 
     and product.category = category.SN 
-    and mn.order_number in($order_number)";
+    and mn.order_number in ($order_number)";
 
     $result = $link->query($sql);
     while($row = $result->fetch_array(MYSQLI_ASSOC)){
@@ -98,9 +98,11 @@ function getSalesReportInfo(){
             "product_code" => $row["product_code"],
             "product_name" => $row["product_name"],
             "product_num" => $row["product_num"],
+            "discount_type" => $row["discount_type"],
             "selling_price" => $row["selling_price"],
             "tax" => $row["tax"],
             "included_tax_total" => $row["included_tax_total"],
+            "excluded_tax_total" => $row["excluded_tax_total"],
             "ship_nos" => $row["ship_nos"],
         );
     }
@@ -121,5 +123,3 @@ function getSalesTotal(){
 
     return $total;
 }
-
-?>

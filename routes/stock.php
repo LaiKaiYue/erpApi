@@ -6,7 +6,7 @@
  * Time: 下午9:11
  */
 
-require_once "../controllers/StockController.php";
+require_once "../controllers/stockController.php";
 require_once "../common/url.php";
 
 switch ($func) {

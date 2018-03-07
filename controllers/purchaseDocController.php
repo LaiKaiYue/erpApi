@@ -234,7 +234,7 @@ function RemovePurchase_body() {
     //將商品狀態改為2(退貨)
     else {
 //        $execSQL[] = "update purchase_body set status='2' where order_number='$order_number' and product_code='$pro_code'";
-        insProductReturnDB($order_number, $prod_code, $number, $execSQL);
+        insPurchaseDocProductReturnDB($order_number, $prod_code, $number, $execSQL);
     }
 
     $result = $db->transaction($execSQL);
@@ -248,7 +248,7 @@ function RemovePurchase_body() {
  * @param $number {number} 退貨數量
  * @param $execSQL {array} sql
  */
-function insProductReturnDB($order_number, $prod_code, $number, &$execSQL) {
+function insPurchaseDocProductReturnDB($order_number, $prod_code, $number, &$execSQL) {
     global $db;
     $tools = new Tools();
     $result = $db->execute("select mn.vendor_code
