@@ -83,19 +83,20 @@ function InsertSales() {
     $stockInfo = new stockInfo();
     $product = json_decode(json_encode($postDT["product"]), true);
 
-//    Sales header
+    //Sales header
     $order_number = $postDT["order_number"];
     $ship_nos = $postDT["ship_nos"];
     $create_date = $postDT["create_date"];
     $custom_code = $postDT["custom_code"];
     $custom_name = $postDT["custom_name"];
-    $payment_type = $postDT["payment_type"];
+    $payment_type = $postDT["payment_type"];    //0: 付現, 1: 月結
     $invoice_type = $postDT["invoice_type"];
     $excluded_tax_total = $postDT["excluded_tax_total"];
     $tax = $postDT["tax"];
     $included_tax_total = $postDT["included_tax_total"];
     $remark = $postDT["remark"];
     $execSQL = array();
+    //0: 進貨, 1: 結帳, 2: 退貨
     if ($payment_type == 0) {
         $execSQL[] = "insert into sales_header(order_number, ship_nos, create_date, custom_code, custom_name, payment_type, invoice_type, excluded_tax_total, tax, included_tax_total, remark, status) VALUES
         ('$order_number', '$ship_nos', '$create_date', '$custom_code', '$custom_name', '$payment_type', '$invoice_type', '$excluded_tax_total', '$tax', '$included_tax_total', '$remark', '1')";
