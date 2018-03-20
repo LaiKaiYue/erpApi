@@ -72,28 +72,27 @@ function getAllStock() {
                 $ln_dtIdx = 0;
                 foreach ($la_vendor as $ls_vendor) {
                     $dt = $db->execute("select code, name, contact_name, contact_tell_nos from vendorsinfo where code='$ls_vendor' and enable='true'");
-
                     if (($ln_dtIdx + 1) == $ln_length) {
-                        $code .= $dt["code"];
-                        $name .= $dt["name"];
-                        $contact_name .= $dt["contact_name"];
-                        $contact_tell_nos .= $dt["contact_tell_nos"];
+                        $code .= $dt[0]["code"];
+                        $name .= $dt[0]["name"];
+                        $contact_name .= $dt[0]["contact_name"];
+                        $contact_tell_nos .= $dt[0]["contact_tell_nos"];
                     }
                     else {
-                        $code .= $dt["code"].",";
-                        $name .= $dt["name"].",";
-                        $contact_name .= $dt["contact_name"].",";
-                        $contact_tell_nos .= $dt["contact_tell_nos"].",";
+                        $code .= $dt[0]["code"].",";
+                        $name .= $dt[0]["name"].",";
+                        $contact_name .= $dt[0]["contact_name"].",";
+                        $contact_tell_nos .= $dt[0]["contact_tell_nos"].",";
                     }
                     $ln_dtIdx++;
                 }
             }
             else {
                 $dt = $db->execute("select code, `name`, contact_name, contact_tell_nos from vendorsinfo where code='$la_vendor[0]' and enable='true'");
-                $code .= $dt["code"];
-                $name .= $dt["name"];
-                $contact_name .= $dt["contact_name"];
-                $contact_tell_nos .= $dt["contact_tell_nos"];
+                $code .= $dt[0]["code"];
+                $name .= $dt[0]["name"];
+                $contact_name .= $dt[0]["contact_name"];
+                $contact_tell_nos .= $dt[0]["contact_tell_nos"];
             }
 
             $data[] = array(
@@ -166,26 +165,26 @@ function getOneStock() {
                 foreach ($la_vendor as $ls_vendor) {
                     $dt = $db->execute("select code, `name`, contact_name, contact_tell_nos from vendorsInfo where code='$ls_vendor' and enable='true'");
                     if (($ln_dtIdx + 1) == $ln_length) {
-                        $code .= $dt["code"];
-                        $name .= $dt["name"];
-                        $contact_name .= $dt["contact_name"];
-                        $contact_tell_nos .= $dt["contact_tell_nos"];
+                        $code .= $dt[0]["code"];
+                        $name .= $dt[0]["name"];
+                        $contact_name .= $dt[0]["contact_name"];
+                        $contact_tell_nos .= $dt[0]["contact_tell_nos"];
                     }
                     else {
-                        $code .= $dt["code"].",";
-                        $name .= $dt["name"].",";
-                        $contact_name .= $dt["contact_name"].",";
-                        $contact_tell_nos .= $dt["contact_tell_nos"].",";
+                        $code .= $dt[0]["code"].",";
+                        $name .= $dt[0]["name"].",";
+                        $contact_name .= $dt[0]["contact_name"].",";
+                        $contact_tell_nos .= $dt[0]["contact_tell_nos"].",";
                     }
                     $ln_dtIdx++;
                 }
             }
             else {
                 $dt = $db->execute("select code, `name`, contact_name, contact_tell_nos from vendorsInfo where code='$la_vendor[0]' and enable='true'");
-                $code .= $dt["code"];
-                $name .= $dt["name"];
-                $contact_name .= $dt["contact_name"];
-                $contact_tell_nos .= $dt["contact_tell_nos"];
+                $code .= $dt[0]["code"];
+                $name .= $dt[0]["name"];
+                $contact_name .= $dt[0]["contact_name"];
+                $contact_tell_nos .= $dt[0]["contact_tell_nos"];
             }
 
             $data[] = array(
@@ -363,26 +362,26 @@ function getUnderSafeStock() {
                 foreach ($la_vendor as $ls_vendor) {
                     $dt = $db->execute("select code, name, contact_name, contact_tell_nos from vendorsInfo where code='$ls_vendor' and enable='true'");
                     if (($ln_dtIdx + 1) == $length) {
-                        $code .= $dt["code"];
-                        $name .= $dt["name"];
-                        $contact_name .= $dt["contact_name"];
-                        $contact_tell_nos .= $dt["contact_tell_nos"];
+                        $code .= $dt[0]["code"];
+                        $name .= $dt[0]["name"];
+                        $contact_name .= $dt[0]["contact_name"];
+                        $contact_tell_nos .= $dt[0]["contact_tell_nos"];
                     }
                     else {
-                        $code .= $dt["code"].",";
-                        $name .= $dt["name"].",";
-                        $contact_name .= $dt["contact_name"].",";
-                        $contact_tell_nos .= $dt["contact_tell_nos"].",";
+                        $code .= $dt[0]["code"].",";
+                        $name .= $dt[0]["name"].",";
+                        $contact_name .= $dt[0]["contact_name"].",";
+                        $contact_tell_nos .= $dt[0]["contact_tell_nos"].",";
                     }
                     $ln_dtIdx++;
                 }
             }
             else {
                 $dt = $db->execute("select code, name, contact_name, contact_tell_nos from vendorsInfo where code='$la_vendor[0]' and enable='true'");
-                $code .= $dt["code"];
-                $name .= $dt["name"];
-                $contact_name .= $dt["contact_name"];
-                $contact_tell_nos .= $dt["contact_tell_nos"];
+                $code .= $dt[0]["code"];
+                $name .= $dt[0]["name"];
+                $contact_name .= $dt[0]["contact_name"];
+                $contact_tell_nos .= $dt[0]["contact_tell_nos"];
             }
 
             $data[] = array(
