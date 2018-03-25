@@ -14,6 +14,10 @@ switch ($func) {
         $allStock = getAllStock();
         echo json_encode($allStock);
         break;
+    case "getStockLastSN":
+        $result = getStockLastSN();
+        echo json_encode($result);
+        break;
     case "getOneStock":
         $stock = getOneStock();
         echo json_encode($stock);

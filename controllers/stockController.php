@@ -43,13 +43,13 @@ function getStockSQL() {
  */
 function getStockLastSN() {
     global $db;
-    $row = $db->query("stockinfo", "1", "SN DESC", "SN", "1");
+    $row = $db->query("stockinfo", "1", "SN DESC", "SN", "limit 1");
     $SN = $row[0]["SN"] + 1;
     if ($SN < 10) $SN = "S000".$SN;
     else if ($SN < 100) $SN = "S00".$SN;
     else if ($SN < 1000) $SN = "S0".$SN;
 
-    return $SN;
+    return $row === false ? $db->getErrorMessage() : $SN;
 }
 
 /**

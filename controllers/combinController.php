@@ -55,7 +55,7 @@ function saveCombination() {
     global $db, $postDT;
     $saveData = json_decode(json_encode($postDT["saveData"]), true);
     $dt = $db->execute("select COALESCE(MAX(group_num),0) group_num from combineinfo");
-    $max_group_num = $dt["group_num"];
+    $max_group_num = $dt[0]["group_num"];
     $max_group_num++;
     $execSQL = array();
 

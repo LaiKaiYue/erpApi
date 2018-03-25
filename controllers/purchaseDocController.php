@@ -248,16 +248,21 @@ function RemovePurchase_body() {
  * @param $number {number} 退貨數量
  * @param $execSQL {array} sql
  */
-function insPurchaseDocProductReturnDB($order_number, $prod_code, $number, &$execSQL) {
+function insPurchaseDocProductReturnDB($from_order_number, $prod_code, $number, &$execSQL) {
     global $db;
     $tools = new Tools();
     $result = $db->execute("select mn.vendor_code
               from purchase_body dt INNER JOIN purchase_header mn ON dt.order_number = mn.order_number
-              where mn.order_number = '$order_number' and dt.product_code = '$prod_code'");
+              where mn.order_number = '$from_order_number' and dt.product_code = '$prod_code'");
 
     $ins_dat = $tools->genInsOrUpdDateTime();
-    $execSQL[] = "insert into product_return (vendor_code, stock_code, `number`, doc_type, ins_dat) VALUES 
-                  ('$result[vendor_code]', '$prod_code', '$number', 'purchaseDoc', '$ins_dat')";
+    $order_number = $tools->genOrderNumber();
+
+    $execSQL[] = "insert into returndoc_mn (order_number, from_order_number, ins_dat, doc_type) VALUES 
+                  ('$order_number', '$from_order_number', '$ins_dat', 'purchaseDoc')";
+
+    $execSQL[] = "insert into returndoc_dt (order_number, `number`, vendor_code, stock_code, doc_type, ins_dat) VALUES 
+                  ('$order_number', '$number', '".$result[0]['vendor_code']."', '$prod_code', 'purchaseDoc', '$ins_dat')";
 }
 
 /**

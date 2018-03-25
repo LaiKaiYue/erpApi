@@ -71,6 +71,11 @@ class DBClass {
                 if (!$this->link->query($lo_sql)) {
                     throw new Exception(mysqli_error($this->link));
                 }
+                else{
+                    $ins_dat = date("Y-m-d H:i:s");
+                    $apiLogSql = "insert into api_logs (execSQL, response, ins_dat) values ('".addslashes($lo_sql)."', 'exec sql scuess', '$ins_dat')";
+                    $this->link->query($apiLogSql);
+                }
             }
             $this->link->commit();
             return true;
@@ -78,6 +83,11 @@ class DBClass {
         catch (Exception $e) {
             $this->error_message = $e->getMessage();
             $this->link->rollback();
+            $ins_dat = date("Y-m-d H:i:s");
+            $execSQL = addslashes(json_encode($la_sql));
+            $apiLogSql = "insert into api_logs (execSQL, response, ins_dat) values ('$execSQL', '".addslashes($this->error_message)."', '$ins_dat')";
+            $this->link->query($apiLogSql);
+            $this->link->commit();
             return false;
         }
     }
@@ -97,6 +107,7 @@ class DBClass {
 
         if (((is_object($this->link)) ? mysqli_error($this->link) : (($___mysqli_res = mysqli_connect_error()) ? $___mysqli_res : false))) {
             $this->error_message = "MySQL ERROR: ".((is_object($this->link)) ? mysqli_error($this->link) : (($___mysqli_res = mysqli_connect_error()) ? $___mysqli_res : false));
+            $this->insSqlLog();
             return false;
         }
         else {
@@ -105,15 +116,17 @@ class DBClass {
                 $result_set[$xx] = mysqli_fetch_assoc($result);
             }
             if (isset($result_set)) {
-                if(count($result_set) == 0){
+                $this->insSqlLog();
+                if (count($result_set) == 0) {
                     return true;
                 }
-                else{
+                else {
                     return $result_set;
                 }
             }
             else {
                 $this->error_message = "result: zero";
+                $this->insSqlLog();
                 return false;
             }
         }
@@ -150,11 +163,13 @@ class DBClass {
 
         if (((is_object($this->link)) ? mysqli_error($this->link) : (($___mysqli_res = mysqli_connect_error()) ? $___mysqli_res : false))) {
             $this->error_message = "MySQL Insert Error: ".((is_object($this->link)) ? mysqli_error($this->link) : (($___mysqli_res = mysqli_connect_error()) ? $___mysqli_res : false));
+            $this->insSqlLog();
             return false;
         }
         else {
-            if($result == false) $this->error_message = "insert error";
+            if ($result == false) $this->error_message = "insert error";
             $this->last_id = mysqli_insert_id($this->link);
+            $this->insSqlLog();
             return $result;
         }
     }
@@ -198,10 +213,12 @@ class DBClass {
 
         if (((is_object($this->link)) ? mysqli_error($this->link) : (($___mysqli_res = mysqli_connect_error()) ? $___mysqli_res : false))) {
             $this->error_message = "MySQL Update Error: ".((is_object($this->link)) ? mysqli_error($this->link) : (($___mysqli_res = mysqli_connect_error()) ? $___mysqli_res : false));
+            $this->insSqlLog();
             return false;
         }
         else {
             if ($result == false) $this->error_message = "update error";
+            $this->insSqlLog();
             return $result;
         }
     }
@@ -229,11 +246,26 @@ class DBClass {
 
         if (((is_object($this->link)) ? mysqli_error($this->link) : (($___mysqli_res = mysqli_connect_error()) ? $___mysqli_res : false))) {
             $this->error_message = "MySQL Delete Error: ".((is_object($this->link)) ? mysqli_error($this->link) : (($___mysqli_res = mysqli_connect_error()) ? $___mysqli_res : false));
+            $this->insSqlLog();
             return false;
         }
         else {
             if ($result == false) $this->error_message = "delete error";
+            $this->insSqlLog();
             return $result;
+        }
+    }
+
+    /**
+     * 紀錄新刪修Log
+     */
+    private function insSqlLog() {
+        $response = $this->error_message == "" ? "exec sql scuessfully" : addslashes($this->error_message);
+        $ins_dat = date("Y-m-d H:i:s");
+        //查詢暫時不紀錄
+        if (stristr($this->last_sql, "select") === false) {
+            $sql = "insert into api_logs (execSQL, response, ins_dat) values ('".addslashes($this->last_sql)."', '$response', '$ins_dat')";
+            $result = mysqli_query($this->link, $sql);
         }
     }
 
